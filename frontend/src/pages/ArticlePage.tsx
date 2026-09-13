@@ -39,21 +39,16 @@ function getPosts(): NewsPost[] {
       slug: post.slug || createSlug(post.title),
     }));
 
-    // Keep built-in articles available even when localStorage
-    // contains an older copy of the news list.
-    const merged = [...storedPosts];
+    // Built-in seed articles are authoritative.
+    // This prevents an older localStorage copy from
+    // breaking public article URLs.
+    const seedIds = new Set(seedPosts.map((post) => post.id));
 
-    for (const seedPost of seedPosts) {
-      const existingIndex = merged.findIndex(
-        (post) => post.id === seedPost.id,
-      );
+    const customPosts = storedPosts.filter(
+      (post) => !seedIds.has(post.id),
+    );
 
-      if (existingIndex === -1) {
-        merged.push(seedPost);
-      }
-    }
-
-    return merged;
+    return [...seedPosts, ...customPosts];
   } catch {
     return seedPosts;
   }
