@@ -6,3 +6,8 @@
 
 # Database backups
 backend/storage/backups/
+
+# Python local environment/cache
+backend/.venv/
+backend/**/__pycache__/
+*.pyc
