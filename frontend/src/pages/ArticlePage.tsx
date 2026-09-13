@@ -16,25 +16,46 @@ function createSlug(title: string): string {
 }
 
 function getPosts(): NewsPost[] {
+  const seedPosts = newsSeed.map((post) => ({
+    ...post,
+    slug: post.slug || createSlug(post.title),
+  }));
+
   const stored = localStorage.getItem(STORAGE_KEY);
 
   if (!stored) {
-    return newsSeed;
+    return seedPosts;
   }
 
   try {
     const parsed = JSON.parse(stored);
 
     if (!Array.isArray(parsed)) {
-      return newsSeed;
+      return seedPosts;
     }
 
-    return parsed.map((post: NewsPost) => ({
+    const storedPosts: NewsPost[] = parsed.map((post: NewsPost) => ({
       ...post,
       slug: post.slug || createSlug(post.title),
     }));
+
+    // Keep built-in articles available even when localStorage
+    // contains an older copy of the news list.
+    const merged = [...storedPosts];
+
+    for (const seedPost of seedPosts) {
+      const existingIndex = merged.findIndex(
+        (post) => post.id === seedPost.id,
+      );
+
+      if (existingIndex === -1) {
+        merged.push(seedPost);
+      }
+    }
+
+    return merged;
   } catch {
-    return newsSeed;
+    return seedPosts;
   }
 }
 
