@@ -14,6 +14,16 @@ import "./Admin.css";
 
 const STORAGE_KEY = "sde-career-connect-news";
 
+function createSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .trim()
+    .normalize("NFD")
+    .replace(/[\\u0300-\\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 const categories: NewsCategory[] = [
   "Scholarships",
   "University",
@@ -93,6 +103,9 @@ export default function AdminNews() {
     setForm((current) => ({
       ...current,
       [field]: value,
+      ...(field === "title" && typeof value === "string"
+        ? { slug: createSlug(value) }
+        : {}),
     }));
   }
 
