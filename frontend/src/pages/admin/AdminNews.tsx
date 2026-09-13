@@ -23,6 +23,7 @@ const categories: NewsCategory[] = [
 ];
 
 const emptyPost: Omit<NewsPost, "id"> = {
+  slug: "",
   title: "",
   summary: "",
   content: "",
@@ -141,6 +142,7 @@ export default function AdminNews() {
     setEditingId(post.id);
 
     setForm({
+      slug: post.slug,
       title: post.title,
       summary: post.summary,
       content: post.content,

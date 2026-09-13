@@ -9,6 +9,7 @@ export type NewsCategory =
 
 export interface NewsPost {
   id: number;
+  slug: string;
   title: string;
   summary: string;
   content: string;

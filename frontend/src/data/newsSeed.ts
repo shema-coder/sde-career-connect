@@ -3,6 +3,7 @@ import type { NewsPost } from "../types/news";
 export const newsSeed: NewsPost[] = [
   {
     id: 1,
+    slug: "scholarship-preparation-guide-s6-graduates",
     title: "Scholarship Preparation Guide for S6 Graduates",
     summary:
       "Important steps that S6 graduates should follow when preparing scholarship applications.",
@@ -18,6 +19,7 @@ export const newsSeed: NewsPost[] = [
   },
   {
     id: 2,
+    slug: "next-step-after-s6-university-admission",
     title: "Your Next Step After S6: University Admission",
     summary:
       "A practical guide for students preparing to join university after completing secondary school.",
@@ -33,6 +35,7 @@ export const newsSeed: NewsPost[] = [
   },
   {
     id: 3,
+    slug: "skills-internships-career-opportunities",
     title: "Discover Skills, Internships and Career Opportunities",
     summary:
       "Explore useful skills, internships, and career opportunities for students and young professionals.",
