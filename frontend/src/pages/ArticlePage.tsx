@@ -5,6 +5,39 @@ import type { NewsPost } from "../types/news";
 
 const STORAGE_KEY = "sde-career-connect-news";
 
+function createSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function getPosts(): NewsPost[] {
+  const stored = localStorage.getItem(STORAGE_KEY);
+
+  if (!stored) {
+    return newsSeed;
+  }
+
+  try {
+    const parsed = JSON.parse(stored);
+
+    if (!Array.isArray(parsed)) {
+      return newsSeed;
+    }
+
+    return parsed.map((post: NewsPost) => ({
+      ...post,
+      slug: post.slug || createSlug(post.title),
+    }));
+  } catch {
+    return newsSeed;
+  }
+}
+
 function renderArticleContent(content: string) {
   return content.split("\n").map((paragraph, index) => (
     <p key={index}>{paragraph}</p>
@@ -13,22 +46,7 @@ function renderArticleContent(content: string) {
 
 export default function ArticlePage() {
   const { slug } = useParams<{ slug: string }>();
-
-  let posts: NewsPost[] = newsSeed;
-
-  const stored = localStorage.getItem(STORAGE_KEY);
-
-  if (stored) {
-    try {
-      const parsed = JSON.parse(stored);
-
-      if (Array.isArray(parsed)) {
-        posts = parsed;
-      }
-    } catch {
-      posts = newsSeed;
-    }
-  }
+  const posts = getPosts();
 
   const post = posts.find(
     (article) =>
@@ -38,6 +56,8 @@ export default function ArticlePage() {
   useEffect(() => {
     if (post) {
       document.title = `${post.title} | SDE Career Connect`;
+    } else {
+      document.title = "Article not found | SDE Career Connect";
     }
   }, [post]);
 
@@ -45,7 +65,9 @@ export default function ArticlePage() {
     return (
       <main className="article-page">
         <h1>Article not found</h1>
-        <p>This article may have been removed or is not yet published.</p>
+        <p>
+          This article may have been removed or is not yet published.
+        </p>
         <Link to="/">Return to homepage</Link>
       </main>
     );
