@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin
+Disallow: /admin/
+Disallow: /admin/news
+Disallow: /admin/applications
+
+Sitemap: https://sde-career-connect.vercel.app/sitemap.xml
