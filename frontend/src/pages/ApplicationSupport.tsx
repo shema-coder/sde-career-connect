@@ -414,7 +414,7 @@ const ApplicationSupport: React.FC<ApplicationSupportProps> = ({
         consent: data.consent,
       };
 
-      const response = await fetch("http://localhost:8000/applications", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/applications`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -494,7 +494,7 @@ const ApplicationSupport: React.FC<ApplicationSupportProps> = ({
 
     try {
       const response = await fetch(
-        `http://localhost:8000/applications/track?reference_code=${encodeURIComponent(
+        `${import.meta.env.VITE_API_URL}/applications/track?reference_code=${encodeURIComponent(
           reference
         )}&tracking_pin=${encodeURIComponent(pin)}`,
         {
