@@ -1,0 +1,2103 @@
+import React, { useEffect, useMemo, useState } from "react";
+import type { ChangeEvent } from "react";
+import { institutionSupportInfo } from "../data/institutionSupport";
+import "./ApplicationSupport.css";
+
+type Institution = "UR" | "RP" | "ALU";
+
+type UploadedFile = {
+  name: string;
+  size: number;
+  type: string;
+  file: File;
+};
+
+type ApplicationData = {
+  institution: Institution | "";
+  fullNames: string;
+  gender: string;
+  province: string;
+  district: string;
+  sector: string;
+  cell: string;
+  village: string;
+  indexNumber: string;
+  nationalId: string;
+  email: string;
+  phone: string;
+  dateOfBirth: string;
+  tradeOption: string;
+  disability: string;
+  disabilityDetails: string;
+  passportPhoto: UploadedFile | null;
+  refugee: string;
+  faculty1: string;
+  faculty2: string;
+  faculty3: string;
+  nationalIdPhoto: UploadedFile | null;
+  resultSlip: UploadedFile | null;
+  consent: boolean;
+};
+
+const STORAGE_KEY = "sde-career-connect-application-support-v2";
+
+const initialData: ApplicationData = {
+  institution: "",
+  fullNames: "",
+  gender: "",
+  province: "",
+  district: "",
+  sector: "",
+  cell: "",
+  village: "",
+  indexNumber: "",
+  nationalId: "",
+  email: "",
+  phone: "",
+  dateOfBirth: "",
+  tradeOption: "",
+  disability: "",
+  disabilityDetails: "",
+  passportPhoto: null,
+  refugee: "",
+  faculty1: "",
+  faculty2: "",
+  faculty3: "",
+  nationalIdPhoto: null,
+  resultSlip: null,
+  consent: false,
+};
+
+const institutionInfo: Record<
+  Institution,
+  {
+    name: string;
+    short: string;
+    description: string;
+    logo: string;
+    requirements: string[];
+    scholarship?: string[];
+  }
+> = {
+  UR: {
+    name: "University of Rwanda",
+    short: "UR",
+    description: "University admission guidance and programme selection.",
+    logo: "/assets/ur-logo.png",
+    requirements: [
+      "Completed Senior 6, TVET or an accepted equivalent qualification.",
+      "At least two relevant principal passes for higher-education entry.",
+      "Programme-specific subject combinations and cut-off requirements may apply.",
+      "Valid identification and academic documents are required.",
+      "Applicants should follow the official UR application and payment process.",
+    ],
+  },
+  RP: {
+    name: "Rwanda Polytechnic",
+    short: "RP",
+    description: "Technical, vocational and applied higher-education guidance.",
+    logo: "/assets/rp-logo.jpeg",
+    requirements: [
+      "Completed Senior 6 or an accepted Level 5 TVET qualification.",
+      "At least two relevant principal passes may be required.",
+      "Programme-specific subjects and requirements apply.",
+      "National ID or passport and valid contact information are required.",
+      "Advanced Diploma applicants for some BTech routes may use relevant academic records.",
+    ],
+  },
+  ALU: {
+    name: "African Leadership University",
+    short: "ALU",
+    description: "Admission, programme and scholarship guidance.",
+    logo: "/assets/alu-logo.webp",
+    requirements: [
+      "Accepted secondary-school qualification or equivalent.",
+      "Academic requirements depend on the programme selected.",
+      "Academic records and other required supporting documents must be provided.",
+      "English proficiency may be required for admission.",
+      "Additional programme-specific requirements can apply.",
+    ],
+    scholarship: [
+      "Financial need may be considered for financial-aid opportunities.",
+      "Academic strength and admission eligibility are important.",
+      "Some scholarships consider leadership, initiative and community impact.",
+      "Scholarship requirements vary by the specific opportunity.",
+      "Additional financial or supporting documents may be requested.",
+    ],
+  },
+};
+
+const steps = [
+  { number: 1, title: "Institution", label: "Choose where you want to apply" },
+  { number: 2, title: "Information", label: "Tell us about yourself" },
+  { number: 3, title: "Documents", label: "Upload your documents" },
+  { number: 4, title: "Choices", label: "Tell us what you want to study" },
+  { number: 5, title: "Review", label: "Check everything before sending" },
+];
+
+const formatBytes = (bytes: number) => {
+  if (!bytes) return "0 KB";
+  const kb = bytes / 1024;
+  if (kb < 1024) return `${kb.toFixed(0)} KB`;
+  return `${(kb / 1024).toFixed(1)} MB`;
+};
+
+const maskValue = (value: string) => {
+  if (!value) return "—";
+  if (value.length <= 4) return "••••";
+  return `${"•".repeat(Math.max(0, value.length - 4))}${value.slice(-4)}`;
+};
+
+type ApplicationSupportProps = {
+  onClose: () => void;
+  initialView?: "form" | "tracking";
+};
+
+const ApplicationSupport: React.FC<ApplicationSupportProps> = ({
+  onClose,
+  initialView = "form",
+}) => {
+  const [data, setData] = useState<ApplicationData>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) return initialData;
+      const parsed = JSON.parse(saved);
+      return {
+        ...initialData,
+        ...parsed,
+        passportPhoto: null,
+        nationalIdPhoto: null,
+        resultSlip: null,
+      };
+    } catch {
+      return initialData;
+    }
+  });
+
+  const [step, setStep] = useState(1);
+  const [submitted, setSubmitted] = useState(false);
+  const [requestId, setRequestId] = useState("");
+  const [trackingPin, setTrackingPin] = useState("");
+
+  const [trackingView, setTrackingView] = useState(
+    initialView === "tracking"
+  );
+  const [trackingReference, setTrackingReference] = useState("");
+  const [trackingPinInput, setTrackingPinInput] = useState("");
+  const [showTrackingPin, setShowTrackingPin] = useState(false);
+  const [trackingLoading, setTrackingLoading] = useState(false);
+  const [trackingError, setTrackingError] = useState("");
+  const [trackingResult, setTrackingResult] = useState<{
+    reference_code: string;
+    institution: string;
+    status: string;
+    public_message: string;
+    created_at: string;
+    updated_at: string;
+  } | null>(null);
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const safeData = {
+      ...data,
+      passportPhoto: null,
+      nationalIdPhoto: null,
+      resultSlip: null,
+    };
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(safeData));
+  }, [data]);
+
+  useEffect(() => {
+    document.body.classList.add("application-support-open");
+
+    return () => {
+      document.body.classList.remove("application-support-open");
+    };
+  }, []);
+
+  const selectedInstitution = data.institution
+    ? institutionInfo[data.institution]
+    : null;
+
+  const selectedSupportInfo = data.institution
+    ? institutionSupportInfo[data.institution]
+    : null;
+
+  const completion = Math.round((step / steps.length) * 100);
+
+  const update = <K extends keyof ApplicationData>(
+    field: K,
+    value: ApplicationData[K]
+  ) => {
+    setData((current) => ({
+      ...current,
+      [field]: value,
+    }));
+
+    setErrors((current) => {
+      const next = { ...current };
+      delete next[field as string];
+      return next;
+    });
+  };
+
+  const handleFile = (
+    field: "passportPhoto" | "nationalIdPhoto" | "resultSlip",
+    event: ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+
+    if (!file) return;
+
+    const isImage =
+      file.type === "image/jpeg" ||
+      file.type === "image/png" ||
+      file.type === "image/webp";
+
+    const isPdf = file.type === "application/pdf";
+
+    if (field !== "resultSlip" && !isImage) {
+      setErrors((current) => ({
+        ...current,
+        [field]: "Please upload a JPG, PNG or WEBP image.",
+      }));
+      event.target.value = "";
+      return;
+    }
+
+    if (field === "resultSlip" && !isImage && !isPdf) {
+      setErrors((current) => ({
+        ...current,
+        [field]: "Please upload an image or PDF document.",
+      }));
+      event.target.value = "";
+      return;
+    }
+
+    if (file.size > 8 * 1024 * 1024) {
+      setErrors((current) => ({
+        ...current,
+        [field]: "Maximum file size is 8 MB.",
+      }));
+      event.target.value = "";
+      return;
+    }
+
+    update(field, {
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      file,
+    });
+  };
+
+  const validateStep = () => {
+    const nextErrors: Record<string, string> = {};
+
+    if (step === 1 && !data.institution) {
+      nextErrors.institution = "Please select an institution.";
+    }
+
+    if (step === 2) {
+      if (!data.fullNames.trim()) nextErrors.fullNames = "Full names are required.";
+      if (!data.gender) nextErrors.gender = "Please select your gender.";
+      if (!data.province.trim()) nextErrors.province = "Province is required.";
+      if (!data.district.trim()) nextErrors.district = "District is required.";
+      if (!data.sector.trim()) nextErrors.sector = "Sector is required.";
+      if (!data.cell.trim()) nextErrors.cell = "Cell is required.";
+      if (!data.village.trim()) nextErrors.village = "Village is required.";
+      if (!data.email.trim()) nextErrors.email = "Email is required.";
+      if (!data.phone.trim()) nextErrors.phone = "Phone number is required.";
+      if (!data.dateOfBirth) nextErrors.dateOfBirth = "Date of birth is required.";
+      if (!data.disability) nextErrors.disability = "Please select an option.";
+
+      if (
+        data.email &&
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())
+      ) {
+        nextErrors.email = "Please enter a valid email address.";
+      }
+    }
+
+    if (step === 3) {
+      if (!data.passportPhoto) {
+        nextErrors.passportPhoto = "Passport photo is required.";
+      }
+
+      if (!data.nationalIdPhoto) {
+        nextErrors.nationalIdPhoto = "National ID photo is required.";
+      }
+
+      if (!data.resultSlip) {
+        nextErrors.resultSlip = "Result slip / diploma is required.";
+      }
+    }
+
+    if (step === 4) {
+      if (!data.refugee) nextErrors.refugee = "Please select an option.";
+      if (!data.faculty1.trim()) nextErrors.faculty1 = "First choice is required.";
+      if (!data.faculty2.trim()) nextErrors.faculty2 = "Second choice is required.";
+      if (!data.faculty3.trim()) nextErrors.faculty3 = "Third choice is required.";
+    }
+
+    if (step === 5 && !data.consent) {
+      nextErrors.consent = "Please confirm that the information is accurate.";
+    }
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  const nextStep = () => {
+    if (!validateStep()) return;
+    setStep((current) => Math.min(current + 1, steps.length));
+  };
+
+  const previousStep = () => {
+    setErrors({});
+    setStep((current) => Math.max(current - 1, 1));
+  };
+
+  const submit = async () => {
+    console.log("[SDE Application] Submit clicked", {
+      saving,
+      consent: data.consent,
+      institution: data.institution,
+    });
+
+    if (saving) return;
+
+    if (!data.consent) {
+      setErrors({
+        consent:
+          "Please confirm that the information is accurate before submitting.",
+      });
+      return;
+    }
+
+    if (!data.institution) {
+      setErrors({
+        institution: "Please select an institution.",
+      });
+      setStep(1);
+      return;
+    }
+
+    setErrors({});
+    setSaving(true);
+
+    try {
+      const payload = {
+        institution: data.institution,
+        full_names: data.fullNames,
+        gender: data.gender,
+        province: data.province,
+        district: data.district,
+        sector: data.sector,
+        cell: data.cell,
+        village: data.village,
+        index_number: data.indexNumber,
+        national_id: data.nationalId,
+        email: data.email,
+        phone: data.phone,
+        date_of_birth: data.dateOfBirth,
+        trade_option: data.tradeOption,
+        disability: data.disability,
+        disability_details: data.disabilityDetails || "",
+        refugee: data.refugee,
+        faculty1: data.faculty1,
+        faculty2: data.faculty2,
+        faculty3: data.faculty3,
+        consent: data.consent,
+      };
+
+      const response = await fetch("http://localhost:8000/applications", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      let result: {
+        detail?: string;
+        reference_code?: string;
+        tracking_pin?: string;
+      } = {};
+
+      try {
+        result = await response.json();
+      } catch {
+        result = {};
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          result.detail || `Application submission failed (${response.status}).`
+        );
+      }
+
+      if (!result.reference_code || !result.tracking_pin) {
+        throw new Error(
+          "The server did not return a reference code and tracking PIN."
+        );
+      }
+
+      console.log("[SDE Application] Backend submission successful:", result);
+
+      setRequestId(result.reference_code);
+      setTrackingPin(result.tracking_pin);
+
+      localStorage.removeItem(STORAGE_KEY);
+      setSubmitted(true);
+    } catch (error) {
+      console.error("[SDE Application] Submission failed:", error);
+
+      setErrors({
+        submit:
+          error instanceof Error
+            ? error.message
+            : "Something went wrong. Please try again.",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const institutionLogo = useMemo(() => {
+    if (!selectedInstitution) return null;
+    return selectedInstitution.logo;
+  }, [selectedInstitution]);
+
+  const trackApplication = async () => {
+    const reference = trackingReference.trim();
+    const pin = trackingPinInput.trim();
+
+    setTrackingError("");
+    setTrackingResult(null);
+
+    if (!reference) {
+      setTrackingError("Please enter your reference code.");
+      return;
+    }
+
+    if (!pin) {
+      setTrackingError("Please enter your private tracking PIN.");
+      return;
+    }
+
+    setTrackingLoading(true);
+
+    try {
+      const response = await fetch(
+        `http://localhost:8000/applications/track?reference_code=${encodeURIComponent(
+          reference
+        )}&tracking_pin=${encodeURIComponent(pin)}`,
+        {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+          },
+        }
+      );
+
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          typeof result?.detail === "string"
+            ? result.detail
+            : "We could not find an application with those tracking details."
+        );
+      }
+
+      setTrackingResult(result);
+    } catch (error) {
+      setTrackingError(
+        error instanceof Error
+          ? error.message
+          : "Unable to check the application status. Please try again."
+      );
+    } finally {
+      setTrackingLoading(false);
+    }
+  };
+
+  if (trackingView) {
+    return (
+      <div className="application-shell application-tracking">
+        <div className="tracking-shell">
+          <button
+            type="button"
+            className="tracking-back"
+            onClick={() => {
+              setTrackingView(false);
+              setTrackingError("");
+              setTrackingResult(null);
+            }}
+          >
+            ← Back
+          </button>
+
+          <header className="tracking-header">
+            <span className="tracking-kicker">SDE Career Connect</span>
+            <h1>Track your application</h1>
+            <p>
+              Use the reference code and private tracking PIN you received
+              after submitting your application support request.
+            </p>
+          </header>
+
+          <section className="tracking-form-card">
+            <div className="tracking-fields">
+              <div className="tracking-field">
+                <label htmlFor="tracking-reference">
+                  Reference Code
+                </label>
+
+                <div className="tracking-input-wrap">
+                  <input
+                    id="tracking-reference"
+                    type="text"
+                    value={trackingReference}
+                    onChange={(event) => {
+                      setTrackingReference(event.target.value);
+                      setTrackingError("");
+                    }}
+                    placeholder="SDE-AS-2026-477424"
+                    autoComplete="off"
+                  />
+                </div>
+              </div>
+
+              <div className="tracking-field">
+                <label htmlFor="tracking-pin">
+                  Private Tracking PIN
+                </label>
+
+                <div className="tracking-input-wrap">
+                  <input
+                    id="tracking-pin"
+                    type={showTrackingPin ? "text" : "password"}
+                    value={trackingPinInput}
+                    onChange={(event) => {
+                      setTrackingPinInput(event.target.value);
+                      setTrackingError("");
+                    }}
+                    placeholder="Enter your PIN"
+                    inputMode="numeric"
+                    autoComplete="off"
+                  />
+
+                  <button
+                    type="button"
+                    className="tracking-pin-toggle"
+                    onClick={() => setShowTrackingPin((current) => !current)}
+                  >
+                    {showTrackingPin ? "Hide" : "Show"}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className="tracking-submit"
+              onClick={() => void trackApplication()}
+              disabled={trackingLoading}
+            >
+              {trackingLoading ? "Checking application..." : "Check Application Status"}
+            </button>
+
+            {trackingError && (
+              <div className="tracking-error" role="alert">
+                {trackingError}
+              </div>
+            )}
+          </section>
+
+          {trackingResult && (
+            <section className="tracking-result-card">
+              <div className="tracking-result-top">
+                <div>
+                  <div className="tracking-reference">
+                    {trackingResult.reference_code}
+                  </div>
+
+                  <h2>Application status</h2>
+                </div>
+
+                <div className="tracking-status-badge">
+                  <span className="tracking-status-dot" />
+                  {trackingResult.status}
+                </div>
+              </div>
+
+              <div className="tracking-journey">
+                <div className="tracking-journey-heading">
+                  <div>
+                    <span className="tracking-section-label">
+                      APPLICATION JOURNEY
+                    </span>
+                    <h3>Follow your support request</h3>
+                  </div>
+                  <span className="tracking-journey-caption">
+                    {trackingResult.status === "Rejected"
+                      ? "This request has been closed."
+                      : trackingResult.status === "Documents Required"
+                        ? "Additional action may be required."
+                        : "Your request is moving through the support process."}
+                  </span>
+                </div>
+
+                <div className="tracking-steps">
+                  {[
+                    "Submitted",
+                    "Received",
+                    "Under Review",
+                    "In Progress",
+                    "Accepted",
+                    "Completed",
+                  ].map((statusLabel, index) => {
+                    const order = [
+                      "Submitted",
+                      "Received",
+                      "Under Review",
+                      "Documents Required",
+                      "In Progress",
+                      "Accepted",
+                      "Completed",
+                    ];
+
+                    const currentIndex = Math.max(
+                      0,
+                      order.indexOf(trackingResult.status),
+                    );
+
+                    const complete =
+                      trackingResult.status !== "Rejected" &&
+                      index < currentIndex;
+
+                    const current =
+                      trackingResult.status !== "Rejected" &&
+                      index === currentIndex;
+
+                    return (
+                      <div
+                        key={statusLabel}
+                        className={`tracking-step ${
+                          complete ? "is-complete" : ""
+                        } ${current ? "is-current" : ""}`}
+                      >
+                        <div className="tracking-step-marker">
+                          {complete ? "✓" : index + 1}
+                        </div>
+
+                        <div className="tracking-step-copy">
+                          <strong>{statusLabel}</strong>
+                          <span>
+                            {complete
+                              ? "Completed"
+                              : current
+                                ? "Current stage"
+                                : "Upcoming"}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {trackingResult.status === "Documents Required" && (
+                  <div className="tracking-special-state tracking-documents-state">
+                    <strong>Documents required</strong>
+                    <span>
+                      Contact SDE Career Connect for instructions about the
+                      missing or additional documents.
+                    </span>
+                  </div>
+                )}
+
+                {trackingResult.status === "Rejected" && (
+                  <div className="tracking-special-state tracking-rejected-state">
+                    <strong>Support request rejected</strong>
+                    <span>
+                      Contact SDE Career Connect for clarification and next
+                      available options.
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="tracking-message">
+                {trackingResult.public_message}
+              </div>
+
+              <div className="tracking-meta">
+                <div className="tracking-meta-item">
+                  <span>Institution</span>
+                  <strong>{trackingResult.institution}</strong>
+                </div>
+
+                <div className="tracking-meta-item">
+                  <span>Submitted</span>
+                  <strong>
+                    {new Date(trackingResult.created_at).toLocaleString()}
+                  </strong>
+                </div>
+
+                <div className="tracking-meta-item">
+                  <span>Last updated</span>
+                  <strong>
+                    {new Date(trackingResult.updated_at).toLocaleString()}
+                  </strong>
+                </div>
+              </div>
+
+              <div className="tracking-security-note">
+                <span>🔒</span>
+                <span>
+                  Your tracking PIN is private. SDE Career Connect will never
+                  display it as part of your public application status.
+                </span>
+              </div>
+            </section>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (submitted) {
+    return (
+      <div className="application-shell">
+        <div className="application-success">
+          <div className="celebration-confetti" aria-hidden="true">
+            {Array.from({ length: 56 }).map((_, index) => (
+              <span
+                key={index}
+                className="confetti-piece"
+                style={{
+                  "--i": index,
+                  "--x": `${((index * 37) % 110) - 55}%`,
+                  "--r": `${(index * 47) % 360}deg`,
+                  "--d": `${(index % 9) * 0.35}s`,
+                } as React.CSSProperties}
+              />
+            ))}
+          </div>
+
+          <div className="celebration-glow celebration-glow-one" />
+          <div className="celebration-glow celebration-glow-two" />
+
+          <button
+            className="application-close success-close"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            ×
+          </button>
+
+          <div className="success-content">
+
+            <div className="success-brand">
+              <div className="success-sde-logo">
+                <img
+                  src="/assets/sde-logo.png"
+                  alt="SDE Career Connect"
+                  onError={(event) => {
+                    event.currentTarget.style.display = "none";
+                    event.currentTarget.nextElementSibling?.classList.add(
+                      "is-visible"
+                    );
+                  }}
+                />
+                <span className="success-sde-fallback">SDE</span>
+              </div>
+              <span>SDE CAREER CONNECT</span>
+            </div>
+
+            <div className="success-hero-icon">
+              <div className="success-trophy">🏆</div>
+              <div className="success-checkmark">✓</div>
+            </div>
+
+            <span className="success-kicker">
+              REQUEST SUCCESSFULLY RECEIVED
+            </span>
+
+            <h1>Congratulations!</h1>
+
+            <p className="success-subtitle">
+              Your application support request is now with SDE Career Connect.
+            </p>
+
+            <p className="success-lead">
+              We have received your information and documents. Our team can now
+              review your request and guide you according to the requirements
+              of your selected institution.
+            </p>
+
+            <div className="success-reference-card">
+              <div className="success-reference-top">
+                <div>
+                  <span className="success-card-eyebrow">
+                    YOUR REFERENCE ID
+                  </span>
+                  <strong className="success-reference-id">
+                    {requestId}
+                  </strong>
+                </div>
+
+                <span className="success-reference-status">
+                  <i />
+                  RECEIVED
+                </span>
+              </div>
+
+              <button
+                type="button"
+                className="copy-request"
+                onClick={() => {
+                  if (requestId && trackingPin) {
+                    navigator.clipboard?.writeText(
+                      `SDE Career Connect\nReference code: ${requestId}\nTracking PIN: ${trackingPin}`
+                    );
+                  }
+                }}
+              >
+                <span>Copy reference and PIN</span>
+                <span>⧉</span>
+              </button>
+            </div>
+
+            <div className="success-tracking-pin">
+              <span className="success-card-eyebrow">
+                PRIVATE TRACKING PIN
+              </span>
+
+              <strong>{trackingPin}</strong>
+
+              <p>
+                Keep this PIN private. You need it to track your application.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              className="tracking-submit success-track-button"
+              onClick={() => {
+                setTrackingReference(requestId);
+                setTrackingPinInput(trackingPin);
+                setTrackingError("");
+                setTrackingResult(null);
+                setTrackingView(true);
+              }}
+            >
+              <span>✓</span>
+              <span>Track My Application</span>
+            </button>
+
+            <div className="success-info-card success-icon-green">
+              <div className="success-info-icon">✓</div>
+              <div>
+                <strong>Support request received</strong>
+                <p>
+                  Keep your reference ID safe. Use it whenever you contact
+                  SDE Career Connect about this request.
+                </p>
+              </div>
+            </div>
+
+            {selectedSupportInfo && (
+              <div className="success-institution-card">
+                <div className="success-institution-icon">
+                  {institutionLogo ? (
+                    <img
+                      src={institutionLogo}
+                      alt={selectedSupportInfo.name}
+                    />
+                  ) : (
+                    <span>{selectedSupportInfo.shortName}</span>
+                  )}
+                </div>
+
+                <div className="success-institution-copy">
+                  <span className="success-card-eyebrow">
+                    SELECTED INSTITUTION
+                  </span>
+                  <h2>{selectedSupportInfo.name}</h2>
+                  <p>
+                    Your guidance will be aligned with the admission
+                    requirements and application process of{" "}
+                    {selectedSupportInfo.shortName}.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <div className="success-section-card">
+              <div className="success-section-heading">
+                <div>
+                  <span className="success-card-eyebrow">
+                    WHAT HAPPENS NEXT
+                  </span>
+                  <h2>Your application support journey</h2>
+                  <p>
+                    We will help you move from preparation to the correct
+                    official application process.
+                  </p>
+                </div>
+              </div>
+
+              <div className="success-steps-grid">
+                <div className="success-step-card">
+                  <span className="success-step-number">01</span>
+                  <div className="success-step-icon">✓</div>
+                  <h3>Information review</h3>
+                  <p>
+                    SDE reviews the information and documents you provided.
+                  </p>
+                </div>
+
+                <div className="success-step-card">
+                  <span className="success-step-number">02</span>
+                  <div className="success-step-icon">◎</div>
+                  <h3>Institution guidance</h3>
+                  <p>
+                    You receive guidance based on your selected university
+                    and programme choices.
+                  </p>
+                </div>
+
+                <div className="success-step-card">
+                  <span className="success-step-number">03</span>
+                  <div className="success-step-icon">↗</div>
+                  <h3>Official application</h3>
+                  <p>
+                    We help you understand how to proceed through the
+                    institution's official application channel.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="success-important-card">
+              <div className="success-icon-warning">!</div>
+
+              <div>
+                <span className="success-card-eyebrow">
+                  IMPORTANT
+                </span>
+
+                <h2>SDE Career Connect is not the official university portal</h2>
+
+                <p>
+                  SDE Career Connect provides application guidance and support.
+                  We are not the official application portal of the selected
+                  university. Final admission decisions and official
+                  applications are handled by the institution itself.
+                </p>
+
+                {selectedSupportInfo && (
+                  <div className="success-important-note">
+                    <strong>
+                      Your selected institution: {selectedSupportInfo.name}
+                    </strong>
+                    <span>
+                      Requirements can vary by programme, so always follow the
+                      latest official institutional instructions.
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="success-support-card">
+              <div>
+                <span className="success-card-eyebrow">
+                  NEED HELP?
+                </span>
+                <h2>Talk to SDE Support</h2>
+                <p>
+                  Contact our team if you need help understanding your next
+                  application step.
+                </p>
+              </div>
+
+              <button
+                className="success-support-button"
+                onClick={() => {
+                  window.open(
+                    "https://wa.me/250796371484?text=Hello%20SDE%20Career%20Connect%2C%20I%20have%20submitted%20an%20Application%20Support%20request.%20My%20request%20ID%20is%20" +
+                      encodeURIComponent(requestId),
+                    "_blank"
+                  );
+                }}
+              >
+                Talk to SDE Support
+                <span>↗</span>
+              </button>
+            </div>
+
+            <button
+              className="success-back-button"
+              onClick={onClose}
+            >
+              ← Back to SDE Career Connect
+            </button>
+
+            <p className="success-footer-note">
+              SDE Career Connect • Helping students make better education and
+              career decisions
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="application-shell">
+      <div className="application-panel">
+        <header className="application-header">
+          <div className="application-brand">
+            <div className="brand-mark">SDE</div>
+            <div>
+              <strong>SDE Career Connect</strong>
+              <span>Application Support</span>
+            </div>
+          </div>
+
+          <button className="application-close" onClick={onClose} aria-label="Close">
+            ×
+          </button>
+        </header>
+
+        <div className="application-progress">
+          <div className="progress-top">
+            <div>
+              <span className="progress-eyebrow">
+                STEP {step} OF {steps.length}
+              </span>
+              <h2>{steps[step - 1].title}</h2>
+              <p>{steps[step - 1].label}</p>
+            </div>
+
+            <strong>{completion}%</strong>
+          </div>
+
+          <div className="progress-track">
+            <div style={{ width: `${completion}%` }} />
+          </div>
+
+          <div className="step-indicators">
+            {steps.map((item) => (
+              <div
+                key={item.number}
+                className={`step-indicator ${
+                  item.number === step
+                    ? "active"
+                    : item.number < step
+                    ? "complete"
+                    : ""
+                }`}
+              >
+                <span>{item.number < step ? "✓" : item.number}</span>
+                <small>{item.title}</small>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <main className="application-content">
+          {step === 1 && (
+            <section className="form-step institution-step">
+
+              <div className="institution-step-intro">
+                <div className="institution-intro-copy">
+                  <span className="section-tag">START HERE</span>
+
+                  <h1>Where do you want to apply?</h1>
+
+                  <p>
+                    Select your institution. We will show you the important
+                    admission information before you continue.
+                  </p>
+                </div>
+
+                <div className="institution-intro-status">
+                  <span className="institution-status-dot" />
+                  <span>
+                    {data.institution
+                      ? "Institution selected"
+                      : "Choose an institution"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="institution-choice-grid">
+                {(Object.keys(institutionInfo) as Institution[]).map((key) => {
+                  const institution = institutionInfo[key];
+                  const selected = data.institution === key;
+
+                  return (
+                    <button
+                      type="button"
+                      key={key}
+                      className={`smart-institution-card ${
+                        selected ? "is-selected" : ""
+                      }`}
+                      onClick={() => {
+                        update("institution", key);
+                        setErrors({});
+                      }}
+                      aria-pressed={selected}
+                    >
+                      <div className="smart-institution-card-top">
+                        <div className="smart-institution-logo">
+                          <img
+                            src={institution.logo}
+                            alt={`${institution.name} logo`}
+                            onError={(event) => {
+                              event.currentTarget.style.display = "none";
+
+                              const fallback =
+                                event.currentTarget.parentElement?.querySelector(
+                                  ".smart-logo-fallback"
+                                );
+
+                              fallback?.classList.add("visible");
+                            }}
+                          />
+
+                          <span className="smart-logo-fallback">
+                            {institution.short}
+                          </span>
+                        </div>
+
+                        <div className="smart-institution-badge">
+                          {selected ? "SELECTED" : institution.short}
+                        </div>
+                      </div>
+
+                      <div className="smart-institution-content">
+                        <h3>{institution.name}</h3>
+                        <p>{institution.description}</p>
+                      </div>
+
+                      <div className="smart-institution-footer">
+                        <span>
+                          {selected
+                            ? "Selected for your application"
+                            : "View admission guidance"}
+                        </span>
+
+                        <span
+                          className="smart-institution-arrow"
+                          aria-hidden="true"
+                        >
+                          {selected ? "✓" : "→"}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {errors.institution && (
+                <p className="field-error institution-selection-error">
+                  {errors.institution}
+                </p>
+              )}
+
+              {selectedSupportInfo && (
+                <section className="smart-guidance-card">
+
+                  <div className="smart-guidance-header">
+                    <div className="smart-guidance-title">
+                      <div className="smart-guidance-mini-badge">
+                        {selectedSupportInfo.shortName}
+                      </div>
+
+                      <div>
+                        <span className="smart-guidance-eyebrow">
+                          {selectedSupportInfo.eyebrow}
+                        </span>
+
+                        <h2>{selectedSupportInfo.name}</h2>
+
+                        <p>{selectedSupportInfo.description}</p>
+                      </div>
+                    </div>
+
+                    <div className="smart-guidance-selected">
+                      <span>✓</span>
+                      Selected
+                    </div>
+                  </div>
+
+                  <div className="smart-guidance-body">
+
+                    <div className="smart-guidance-column">
+                      <div className="smart-guidance-column-heading">
+                        <span className="smart-guidance-icon requirements">
+                          ✓
+                        </span>
+
+                        <div>
+                          <strong>Admission requirements</strong>
+                          <small>
+                            {selectedSupportInfo.applicationType}
+                          </small>
+                        </div>
+                      </div>
+
+                      <ul>
+                        {selectedSupportInfo.requirements.map((item) => (
+                          <li key={item}>
+                            <span>✓</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="smart-guidance-column">
+                      <div className="smart-guidance-column-heading">
+                        <span className="smart-guidance-icon documents">
+                          ↗
+                        </span>
+
+                        <div>
+                          <strong>Documents to prepare</strong>
+                          <small>
+                            Keep your documents clear and readable
+                          </small>
+                        </div>
+                      </div>
+
+                      <ul>
+                        {selectedSupportInfo.documents.map((item) => (
+                          <li key={item}>
+                            <span>✓</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                  </div>
+
+                  {selectedSupportInfo.important.length > 0 && (
+                    <div className="smart-guidance-important">
+                      <div className="smart-guidance-alert-icon">!</div>
+
+                      <div>
+                        <strong>
+                          Important for {selectedSupportInfo.shortName}
+                        </strong>
+
+                        <ul>
+                          {selectedSupportInfo.important.map((item) => (
+                            <li key={item}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedSupportInfo.scholarship.length > 0 && (
+                    <div className="smart-guidance-scholarship">
+                      <div className="smart-guidance-scholarship-icon">
+                        ✦
+                      </div>
+
+                      <div>
+                        <strong>Scholarships & financial aid</strong>
+
+                        <ul>
+                          {selectedSupportInfo.scholarship.map((item) => (
+                            <li key={item}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="smart-guidance-support">
+                    <span>💡</span>
+                    <p>{selectedSupportInfo.supportNote}</p>
+                  </div>
+
+                </section>
+              )}
+
+              <div
+                className={`smart-next-card ${
+                  data.institution ? "ready" : "not-ready"
+                }`}
+              >
+                <div className="smart-next-selection">
+
+                  <div className="smart-next-check">
+                    {data.institution ? "✓" : "1"}
+                  </div>
+
+                  <div>
+                    <span className="smart-next-eyebrow">
+                      {data.institution
+                        ? "YOUR SELECTION"
+                        : "NEXT STEP"}
+                    </span>
+
+                    <h3>
+                      {data.institution
+                        ? selectedSupportInfo?.name
+                        : "Choose an institution first"}
+                    </h3>
+
+                    <p>
+                      {data.institution
+                        ? `You selected ${selectedSupportInfo?.shortName}. Your application will be prepared for this institution.`
+                        : "Select UR, RP or ALU above to continue with your application."}
+                    </p>
+                  </div>
+
+                </div>
+
+                <button
+                  type="button"
+                  className="smart-next-button"
+                  onClick={() => {
+                    if (!data.institution) {
+                      setErrors({
+                        institution: "Please select an institution to continue.",
+                      });
+                      return;
+                    }
+
+                    setErrors({});
+                    setStep(2);
+                  }}
+                  disabled={!data.institution}
+                >
+                  <span>Continue to personal information</span>
+                  <span className="smart-next-arrow" aria-hidden="true">
+                    →
+                  </span>
+                </button>
+              </div>
+
+            </section>
+          )}
+
+          {step === 2 && (
+            <section className="form-step">
+              <div className="intro-block">
+                <span className="section-tag">YOUR DETAILS</span>
+                <h1>Let's get to know you.</h1>
+                <p>
+                  Enter your information carefully. Fields marked with *
+                  are required.
+                </p>
+              </div>
+
+              <div className="form-section">
+                <div className="form-section-heading">
+                  <span>01</span>
+                  <div>
+                    <h3>Personal information</h3>
+                    <p>Your basic identification and contact details.</p>
+                  </div>
+                </div>
+
+                <div className="form-grid">
+                  <Field
+                    label="FULL NAMES"
+                    required
+                    value={data.fullNames}
+                    error={errors.fullNames}
+                    onChange={(value) => update("fullNames", value)}
+                    placeholder="Enter your full names"
+                  />
+
+                  <div className="field">
+                    <label>GENDER *</label>
+                    <div className="gender-options">
+                      {["Male", "Female", "Other"].map((gender) => (
+                        <button
+                          type="button"
+                          key={gender}
+                          className={
+                            data.gender === gender ? "gender-selected" : ""
+                          }
+                          onClick={() => update("gender", gender)}
+                        >
+                          <span>
+                            {gender === "Male"
+                              ? "♂"
+                              : gender === "Female"
+                              ? "♀"
+                              : "○"}
+                          </span>
+                          {gender}
+                        </button>
+                      ))}
+                    </div>
+                    {errors.gender && (
+                      <p className="field-error">{errors.gender}</p>
+                    )}
+                  </div>
+
+                  <Field
+                    label="INDEX NUMBER"
+                    value={data.indexNumber}
+                    onChange={(value) => update("indexNumber", value)}
+                    placeholder="e.g. 123456789"
+                  />
+
+                  <Field
+                    label="NATIONAL ID"
+                    value={data.nationalId}
+                    onChange={(value) => update("nationalId", value)}
+                    placeholder="Enter your National ID number"
+                  />
+
+                  <Field
+                    label="YOUR EMAIL"
+                    required
+                    type="email"
+                    value={data.email}
+                    error={errors.email}
+                    onChange={(value) => update("email", value)}
+                    placeholder="you@example.com"
+                  />
+
+                  <Field
+                    label="PHONE NUMBER"
+                    required
+                    type="tel"
+                    value={data.phone}
+                    error={errors.phone}
+                    onChange={(value) => update("phone", value)}
+                    placeholder="+250 7XX XXX XXX"
+                  />
+
+                  <Field
+                    label="DATE OF BIRTH"
+                    required
+                    type="date"
+                    value={data.dateOfBirth}
+                    error={errors.dateOfBirth}
+                    onChange={(value) => update("dateOfBirth", value)}
+                  />
+
+                  <Field
+                    label="TRADE OR OPTION THAT YOU'VE STUDIED"
+                    value={data.tradeOption}
+                    onChange={(value) => update("tradeOption", value)}
+                    placeholder="e.g. PCM, MCB, Software Development..."
+                  />
+                </div>
+              </div>
+
+              <div className="form-section">
+                <div className="form-section-heading">
+                  <span>02</span>
+                  <div>
+                    <h3>RESIDENTIAL ADDRESS — AHO UTUYE</h3>
+                    <p>Help us understand where you currently live.</p>
+                  </div>
+                </div>
+
+                <div className="form-grid address-grid">
+                  <Field
+                    label="PROVINCE / INTARA"
+                    required
+                    value={data.province}
+                    error={errors.province}
+                    onChange={(value) => update("province", value)}
+                    placeholder="e.g. Eastern Province"
+                  />
+
+                  <Field
+                    label="DISTRICT / AKARERE"
+                    required
+                    value={data.district}
+                    error={errors.district}
+                    onChange={(value) => update("district", value)}
+                    placeholder="e.g. Nyagatare"
+                  />
+
+                  <Field
+                    label="SECTOR / UMURENGE"
+                    required
+                    value={data.sector}
+                    error={errors.sector}
+                    onChange={(value) => update("sector", value)}
+                    placeholder="Enter sector"
+                  />
+
+                  <Field
+                    label="CELL / AKAGARI"
+                    required
+                    value={data.cell}
+                    error={errors.cell}
+                    onChange={(value) => update("cell", value)}
+                    placeholder="Enter cell"
+                  />
+
+                  <Field
+                    label="VILLAGE / UMUDUGUDU"
+                    required
+                    value={data.village}
+                    error={errors.village}
+                    onChange={(value) => update("village", value)}
+                    placeholder="Enter village"
+                  />
+                </div>
+              </div>
+
+              <div className="form-section">
+                <div className="form-section-heading">
+                  <span>03</span>
+                  <div>
+                    <h3>Additional information</h3>
+                    <p>This helps us provide more appropriate guidance.</p>
+                  </div>
+                </div>
+
+                <div className="field">
+                  <label>DO YOU HAVE DISABILITY? *</label>
+                  <div className="choice-row">
+                    {["Yes", "No"].map((option) => (
+                      <button
+                        type="button"
+                        key={option}
+                        className={
+                          data.disability === option ? "choice-selected" : ""
+                        }
+                        onClick={() => update("disability", option)}
+                      >
+                        <span>{data.disability === option ? "✓" : ""}</span>
+                        {option}
+                      </button>
+                    ))}
+                  </div>
+                  {errors.disability && (
+                    <p className="field-error">{errors.disability}</p>
+                  )}
+                </div>
+
+                {data.disability === "Yes" && (
+                  <Field
+                    label="PLEASE TELL US MORE (OPTIONAL)"
+                    value={data.disabilityDetails}
+                    onChange={(value) => update("disabilityDetails", value)}
+                    placeholder="Tell us anything we should consider when supporting you"
+                  />
+                )}
+              </div>
+            </section>
+          )}
+
+          {step === 3 && (
+            <section className="form-step">
+              <div className="intro-block">
+                <span className="section-tag">DOCUMENTS</span>
+                <h1>Upload your documents.</h1>
+                <p>
+                  Clear documents help our team give you accurate application
+                  guidance.
+                </p>
+              </div>
+
+              <div className="photo-instruction">
+                <span>📸</span>
+                <div>
+                  <strong>Passport photo requirement</strong>
+                  <p>
+                    PLEASE MAKE SURE KO AMATWI YOSE AGARAGARA KANDI NISURA IKABA
+                    IGARAGARA KUBURYO UMUNTU URI KURI ID ABA ARI UMWE NURI KURI
+                    PASSPORT PHOTO
+                  </p>
+                </div>
+              </div>
+
+              <div className="upload-grid">
+                <FileUpload
+                  id="passport-photo"
+                  title="UPLOAD YOUR PASSPORT PHOTO"
+                  description="JPG, PNG or WEBP · Maximum 8 MB"
+                  required
+                  file={data.passportPhoto}
+                  error={errors.passportPhoto}
+                  onChange={(event) => handleFile("passportPhoto", event)}
+                  accept="image/jpeg,image/png,image/webp"
+                  icon="📸"
+                />
+
+                <FileUpload
+                  id="national-id-photo"
+                  title="UPLOAD YOUR NATIONAL ID PHOTO"
+                  description="Clear image of your National ID · Maximum 8 MB"
+                  required
+                  file={data.nationalIdPhoto}
+                  error={errors.nationalIdPhoto}
+                  onChange={(event) => handleFile("nationalIdPhoto", event)}
+                  accept="image/jpeg,image/png,image/webp"
+                  icon="🪪"
+                />
+
+                <FileUpload
+                  id="result-slip"
+                  title="UPLOAD YOUR RESULT SLIP / DIPLOMA"
+                  description="JPG, PNG or PDF · Maximum 8 MB"
+                  required
+                  file={data.resultSlip}
+                  error={errors.resultSlip}
+                  onChange={(event) => handleFile("resultSlip", event)}
+                  accept="image/jpeg,image/png,image/webp,application/pdf"
+                  icon="📄"
+                />
+              </div>
+
+              <div className="security-note">
+                <span>🔒</span>
+                <div>
+                  <strong>Your documents are sensitive information.</strong>
+                  <p>
+                    Keep your original documents safe. This application flow
+                    does not expose your uploaded files through a public URL.
+                  </p>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {step === 4 && (
+            <section className="form-step">
+              <div className="intro-block">
+                <span className="section-tag">YOUR CHOICES</span>
+                <h1>What would you like to study?</h1>
+                <p>
+                  Give us three options. If you are not sure, don't worry —
+                  we can help you identify suitable programmes.
+                </p>
+              </div>
+
+              <div className="form-section">
+                <div className="form-section-heading">
+                  <span>01</span>
+                  <div>
+                    <h3>REFUGEE STATUS</h3>
+                    <p>This information can help identify relevant opportunities.</p>
+                  </div>
+                </div>
+
+                <div className="field">
+                  <label>ARE YOU REFUGEE? *</label>
+                  <div className="choice-row">
+                    {["Yes", "No"].map((option) => (
+                      <button
+                        type="button"
+                        key={option}
+                        className={
+                          data.refugee === option ? "choice-selected" : ""
+                        }
+                        onClick={() => update("refugee", option)}
+                      >
+                        <span>{data.refugee === option ? "✓" : ""}</span>
+                        {option}
+                      </button>
+                    ))}
+                  </div>
+                  {errors.refugee && (
+                    <p className="field-error">{errors.refugee}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="form-section choices-section">
+                <div className="form-section-heading">
+                  <span>02</span>
+                  <div>
+                    <h3>FACULTIES / PROGRAMMES UZIGA — 3 OPTIONS</h3>
+                    <p>
+                      NIBA UTAZI IZIBA MURI RP ZOSE URATWAIKIRA TUZIGUHE.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="help-note">
+                  <span>💡</span>
+                  <div>
+                    <strong>Not sure what to choose?</strong>
+                    <p>
+                      That's completely okay. Write “I NEED HELP” in one of
+                      your choices and our team can guide you.
+                    </p>
+                    <a
+                      href="https://wa.me/250796371484"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Get programme guidance on WhatsApp ↗
+                    </a>
+                  </div>
+                </div>
+
+                <div className="faculty-list">
+                  <ChoiceField
+                    number="01"
+                    label="FIRST OPTION"
+                    value={data.faculty1}
+                    error={errors.faculty1}
+                    onChange={(value) => update("faculty1", value)}
+                    placeholder="Enter faculty / programme"
+                  />
+
+                  <ChoiceField
+                    number="02"
+                    label="SECOND OPTION"
+                    value={data.faculty2}
+                    error={errors.faculty2}
+                    onChange={(value) => update("faculty2", value)}
+                    placeholder="Enter faculty / programme"
+                  />
+
+                  <ChoiceField
+                    number="03"
+                    label="THIRD OPTION"
+                    value={data.faculty3}
+                    error={errors.faculty3}
+                    onChange={(value) => update("faculty3", value)}
+                    placeholder="Enter faculty / programme"
+                  />
+                </div>
+              </div>
+            </section>
+          )}
+
+          {step === 5 && (
+            <section className="form-step">
+              <div className="intro-block">
+                <span className="section-tag">FINAL CHECK</span>
+                <h1>Review your application.</h1>
+                <p>
+                  Check your information carefully before sending your support
+                  request.
+                </p>
+              </div>
+
+              <div className="review-institution">
+                <div className="review-logo">
+                  {institutionLogo && (
+                    <img
+                      src={institutionLogo}
+                      alt=""
+                      onError={(event) => {
+                        event.currentTarget.style.display = "none";
+                      }}
+                    />
+                  )}
+                  <span>{selectedInstitution?.short}</span>
+                </div>
+                <div>
+                  <span>SELECTED INSTITUTION</span>
+                  <strong>{selectedInstitution?.name || "Not selected"}</strong>
+                </div>
+                <button type="button" onClick={() => setStep(1)}>
+                  Edit
+                </button>
+              </div>
+
+              <ReviewSection
+                title="Personal information"
+                onEdit={() => setStep(2)}
+              >
+                <ReviewRow label="Full names" value={data.fullNames} />
+                <ReviewRow label="Gender" value={data.gender} />
+                <ReviewRow
+                  label="Address"
+                  value={[
+                    data.province,
+                    data.district,
+                    data.sector,
+                    data.cell,
+                    data.village,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                />
+                <ReviewRow label="Index number" value={data.indexNumber} />
+                <ReviewRow
+                  label="National ID"
+                  value={maskValue(data.nationalId)}
+                />
+                <ReviewRow label="Email" value={data.email} />
+                <ReviewRow label="Phone" value={data.phone} />
+                <ReviewRow label="Date of birth" value={data.dateOfBirth} />
+                <ReviewRow label="Trade / option" value={data.tradeOption} />
+                <ReviewRow label="Disability" value={data.disability} />
+              </ReviewSection>
+
+              <ReviewSection
+                title="Documents"
+                onEdit={() => setStep(3)}
+              >
+                <ReviewFile label="Passport photo" file={data.passportPhoto} />
+                <ReviewFile label="National ID photo" file={data.nationalIdPhoto} />
+                <ReviewFile label="Result slip / diploma" file={data.resultSlip} />
+              </ReviewSection>
+
+              <ReviewSection
+                title="Choices & additional information"
+                onEdit={() => setStep(4)}
+              >
+                <ReviewRow label="Refugee" value={data.refugee} />
+                <ReviewRow label="First choice" value={data.faculty1} />
+                <ReviewRow label="Second choice" value={data.faculty2} />
+                <ReviewRow label="Third choice" value={data.faculty3} />
+              </ReviewSection>
+
+              <div className="sde-portal-disclaimer">
+            <div className="sde-portal-disclaimer-icon">i</div>
+            <div>
+              <strong>SDE Career Connect is a guidance service</strong>
+              <p>
+                SDE Career Connect is <strong>not the official application portal</strong>
+                of the selected university. We help you prepare your information,
+                documents and programme choices so you can apply correctly through
+                the institution's official process.
+              </p>
+            </div>
+          </div>
+
+          <label className="consent-box">
+                <input
+                  type="checkbox"
+                  checked={data.consent}
+                  onChange={(event) =>
+                    update("consent", event.target.checked)
+                  }
+                />
+                <span>
+                  I confirm that the information I have provided is accurate
+                  and that SDE Career Connect may use it to provide application
+                  support.
+                </span>
+              </label>
+
+              {errors.consent && (
+                <p className="field-error">{errors.consent}</p>
+              )}
+            </section>
+          )}
+        </main>
+
+        <footer className="application-footer">
+          <div className="footer-hint">
+            {step === 1 && "Choose an institution to continue."}
+            {step === 2 && "Your information is saved automatically on this device."}
+            {step === 3 && "Make sure all required documents are clear and readable."}
+            {step === 4 && "You can change your choices before submitting."}
+            {step === 5 && "Almost done — check everything one last time."}
+          </div>
+
+          <div className="footer-actions">
+            {step > 1 && (
+              <button
+                type="button"
+                className="back-action"
+                onClick={previousStep}
+              >
+                ← Back
+              </button>
+            )}
+
+            {step < steps.length ? (
+              <button
+                type="button"
+                className="primary-action"
+                onClick={nextStep}
+              >
+                Continue
+                <span>→</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="primary-action submit-action"
+                onClick={() => void submit()}
+                disabled={saving}
+              >
+                {saving ? "Sending..." : "Submit support request"}
+                {!saving && <span>✓</span>}
+              </button>
+            )}
+          </div>
+        </footer>
+      </div>
+    </div>
+  );
+};
+
+const Field = ({
+  label,
+  required,
+  type = "text",
+  value,
+  error,
+  placeholder,
+  onChange,
+}: {
+  label: string;
+  required?: boolean;
+  type?: string;
+  value: string;
+  error?: string;
+  placeholder?: string;
+  onChange: (value: string) => void;
+}) => (
+  <div className="field">
+    <label>
+      {label} {required && "*"}
+    </label>
+    <input
+      type={type}
+      value={value}
+      placeholder={placeholder}
+      onChange={(event) => onChange(event.target.value)}
+    />
+    {error && <p className="field-error">{error}</p>}
+  </div>
+);
+
+const ChoiceField = ({
+  number,
+  label,
+  value,
+  error,
+  placeholder,
+  onChange,
+}: {
+  number: string;
+  label: string;
+  value: string;
+  error?: string;
+  placeholder?: string;
+  onChange: (value: string) => void;
+}) => (
+  <div className="choice-field">
+    <div className="choice-number">{number}</div>
+    <div className="field">
+      <label>{label} *</label>
+      <input
+        value={value}
+        placeholder={placeholder}
+        onChange={(event) => onChange(event.target.value)}
+      />
+      {error && <p className="field-error">{error}</p>}
+    </div>
+  </div>
+);
+
+const FileUpload = ({
+  id,
+  title,
+  description,
+  required,
+  file,
+  error,
+  onChange,
+  accept,
+  icon,
+}: {
+  id: string;
+  title: string;
+  description: string;
+  required?: boolean;
+  file: UploadedFile | null;
+  error?: string;
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  accept: string;
+  icon: string;
+}) => (
+  <div className={`upload-card ${file ? "has-file" : ""}`}>
+    <label htmlFor={id} className="upload-label">
+      <div className="upload-icon">{icon}</div>
+      <div className="upload-copy">
+        <strong>
+          {title} {required && "*"}
+        </strong>
+
+        {file ? (
+          <div className="selected-file">
+            <span>{file.name}</span>
+            <small>{formatBytes(file.size)}</small>
+          </div>
+        ) : (
+          <>
+            <p>{description}</p>
+            <span className="upload-cta">Choose file →</span>
+          </>
+        )}
+      </div>
+    </label>
+
+    <input id={id} type="file" accept={accept} onChange={onChange} />
+
+    {error && <p className="field-error upload-error">{error}</p>}
+  </div>
+);
+
+const ReviewSection = ({
+  title,
+  onEdit,
+  children,
+}: {
+  title: string;
+  onEdit: () => void;
+  children: React.ReactNode;
+}) => (
+  <div className="review-section">
+    <div className="review-section-header">
+      <h3>{title}</h3>
+      <button type="button" onClick={onEdit}>
+        Edit
+      </button>
+    </div>
+    <div className="review-grid">{children}</div>
+  </div>
+);
+
+const ReviewRow = ({ label, value }: { label: string; value?: string }) => (
+  <div className="review-row">
+    <span>{label}</span>
+    <strong>{value || "—"}</strong>
+  </div>
+);
+
+const ReviewFile = ({
+  label,
+  file,
+}: {
+  label: string;
+  file: UploadedFile | null;
+}) => (
+  <div className="review-file">
+    <span>✓</span>
+    <div>
+      <strong>{label}</strong>
+      <small>{file?.name || "Not uploaded"}</small>
+    </div>
+  </div>
+);
+
+export default ApplicationSupport;
