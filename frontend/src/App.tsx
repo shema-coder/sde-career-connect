@@ -344,12 +344,12 @@ const selectedPostData = publishedPosts.find(
                     <p>{post.summary}</p>
 
                     <div className="post-footer">
-                      <button
+                      <a
                         className="read-more"
-                        onClick={() => setSelectedPost(post.id)}
+                        href={`/articles/${post.slug}`}
                       >
                         Read More <span>↗</span>
-                      </button>
+                      </a>
 
                       <a
                         className="post-whatsapp"
