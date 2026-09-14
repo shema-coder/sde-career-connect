@@ -131,3 +131,34 @@ class NewsPostResponse(NewsPostBase):
     created_at: datetime
     updated_at: datetime
 
+
+
+class MemberCreate(BaseModel):
+    full_name: str
+    phone: str
+    email: str | None = None
+    education_level: str
+    interest: str
+
+
+class MemberResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    full_name: str
+    phone: str
+    email: str | None = None
+    education_level: str
+    interest: str
+    created_at: datetime
+
+
+class MemberCountResponse(BaseModel):
+    count: int
+
+
+class MemberStatsResponse(BaseModel):
+    total: int
+    today: int
+    this_week: int
+    this_month: int

@@ -3,6 +3,7 @@ import { apiRequest } from "./lib/api";
 import type { NewsCategory, NewsPost } from "./types/news";
 import "./App.css";
 import ApplicationSupport from "./pages/ApplicationSupport";
+import MemberRegistration from "./pages/MemberRegistration";
 
 const WHATSAPP_GROUP =
   "https://chat.whatsapp.com/KdxQwE1skoLIsmLC3i0HmK";
@@ -27,6 +28,24 @@ function App() {
     useState<"form" | "tracking">("form");
   const [activeCategory, setActiveCategory] = useState<"All" | NewsCategory>("All");
   const [selectedPost, setSelectedPost] = useState<number | null>(null);
+  const [showMemberRegistration, setShowMemberRegistration] =
+    useState(false);
+  const [memberCount, setMemberCount] = useState(0);
+
+  useEffect(() => {
+    async function loadMemberCount() {
+      try {
+        const data = await apiRequest<{ count: number }>(
+          "/members/count",
+        );
+        setMemberCount(data.count);
+      } catch (error) {
+        console.error("Failed to load member count:", error);
+      }
+    }
+
+    void loadMemberCount();
+  }, []);
 
   useEffect(() => {
     async function loadPosts() {
@@ -132,6 +151,17 @@ const selectedPostData = publishedPosts.find(
               About Us
             </a>
 
+            <button
+              type="button"
+              className="nav-member-button"
+              onClick={() => {
+                setMenuOpen(false);
+                setShowMemberRegistration(true);
+              }}
+            >
+              Register Now
+            </button>
+
             <a
               className="nav-whatsapp"
               href={WHATSAPP_GROUP}
@@ -190,6 +220,24 @@ const selectedPostData = publishedPosts.find(
                 >
                   Join Our WhatsApp Group
                 </a>
+              </div>
+
+              <div className="hero-member-register">
+                <div>
+                  <strong>Join the SDE community</strong>
+                  <span>
+                    Get connected to new scholarships, admissions and
+                    opportunities.
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  className="button button-yellow"
+                  onClick={() => setShowMemberRegistration(true)}
+                >
+                  JOIN SDE CAREER CONNECT →
+                </button>
               </div>
 
               <div className="hero-trust">
@@ -424,6 +472,34 @@ const selectedPostData = publishedPosts.find(
           </div>
         </section>
 
+        <section className="member-community-section" id="members">
+          <div className="container member-community-card">
+            <div>
+              <span className="section-kicker">
+                SDE CAREER CONNECT COMMUNITY
+              </span>
+              <h2>Growing together. Moving forward.</h2>
+              <p>
+                Join students and graduates staying connected to
+                scholarships, admissions, careers and opportunities.
+              </p>
+            </div>
+
+            <div className="member-community-number">
+              <strong>{memberCount.toLocaleString()}+</strong>
+              <span>REGISTERED MEMBERS</span>
+            </div>
+
+            <button
+              type="button"
+              className="button button-yellow"
+              onClick={() => setShowMemberRegistration(true)}
+            >
+              REGISTER NOW →
+            </button>
+          </div>
+        </section>
+
         <section className="about-section" id="about">
           <div className="container about-card">
             <div>
@@ -572,6 +648,22 @@ const selectedPostData = publishedPosts.find(
         </div>
       )}
     </div>    </>
+
+      {showMemberRegistration && (
+        <MemberRegistration
+          onClose={() => setShowMemberRegistration(false)}
+          onRegistered={() => {
+            void apiRequest<{ count: number }>("/members/count")
+              .then((data) => setMemberCount(data.count))
+              .catch((error) =>
+                console.error(
+                  "Failed to refresh member count:",
+                  error,
+                ),
+              );
+          }}
+        />
+      )}
 
       {showApplicationSupport && (
         <ApplicationSupport

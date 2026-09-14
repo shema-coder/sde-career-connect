@@ -8,7 +8,7 @@ from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 from .database import Base, engine, get_db
-from .models import NewsPost, StudentApplication
+from .models import NewsPost, StudentApplication, Member
 from .schemas import (
     ApplicationCreate,
     ApplicationCreatedResponse,
@@ -18,6 +18,10 @@ from .schemas import (
     NewsPostCreate,
     NewsPostResponse,
     NewsPostUpdate,
+    MemberCreate,
+    MemberResponse,
+    MemberCountResponse,
+    MemberStatsResponse,
 )
 
 
@@ -475,3 +479,215 @@ def track_application(
         )
 
     return public_application_response(application)
+
+
+# ============================================================
+# MEMBER REGISTRATION
+# ============================================================
+
+@app.post(
+    "/members",
+    response_model=MemberResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_member(
+    payload: MemberCreate,
+    db: Session = Depends(get_db),
+):
+    full_name = payload.full_name.strip()
+    phone = payload.phone.strip()
+    email = payload.email.strip() if payload.email else None
+    education_level = payload.education_level.strip()
+    interest = payload.interest.strip()
+
+    if not full_name:
+        raise HTTPException(
+            status_code=400,
+            detail="Full name is required.",
+        )
+
+    if not phone:
+        raise HTTPException(
+            status_code=400,
+            detail="Phone / WhatsApp number is required.",
+        )
+
+    if not education_level:
+        raise HTTPException(
+            status_code=400,
+            detail="Education level is required.",
+        )
+
+    if not interest:
+        raise HTTPException(
+            status_code=400,
+            detail="Main interest is required.",
+        )
+
+    allowed_education = {
+        "S6 Graduate",
+        "University Student",
+        "Graduate",
+        "Other",
+    }
+
+    allowed_interests = {
+        "Scholarships",
+        "University Admissions",
+        "Career Opportunities",
+        "General Opportunities",
+    }
+
+    if education_level not in allowed_education:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid education level.",
+        )
+
+    if interest not in allowed_interests:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid main interest.",
+        )
+
+    duplicate = (
+        db.query(Member)
+        .filter(Member.phone == phone)
+        .first()
+    )
+
+    if duplicate:
+        raise HTTPException(
+            status_code=409,
+            detail="This phone / WhatsApp number is already registered.",
+        )
+
+    member = Member(
+        full_name=full_name,
+        phone=phone,
+        email=email or None,
+        education_level=education_level,
+        interest=interest,
+    )
+
+    db.add(member)
+    db.commit()
+    db.refresh(member)
+
+    return member
+
+
+@app.get(
+    "/members/count",
+    response_model=MemberCountResponse,
+)
+def get_member_count(
+    db: Session = Depends(get_db),
+):
+    count = db.query(Member).count()
+
+    return MemberCountResponse(count=count)
+
+
+@app.get(
+    "/admin/members",
+    response_model=list[MemberResponse],
+)
+def get_admin_members(
+    db: Session = Depends(get_db),
+):
+    return (
+        db.query(Member)
+        .order_by(Member.created_at.desc())
+        .all()
+    )
+
+
+@app.get(
+    "/admin/members/stats",
+    response_model=MemberStatsResponse,
+)
+def get_admin_member_stats(
+    db: Session = Depends(get_db),
+):
+    now = datetime.now(timezone.utc)
+
+    today_start = datetime(
+        now.year,
+        now.month,
+        now.day,
+        tzinfo=timezone.utc,
+    )
+
+    week_start = datetime(
+        now.year,
+        now.month,
+        now.day,
+        tzinfo=timezone.utc,
+    )
+
+    week_start = week_start.replace(
+        day=week_start.day - week_start.weekday()
+    )
+
+    month_start = datetime(
+        now.year,
+        now.month,
+        1,
+        tzinfo=timezone.utc,
+    )
+
+    total = db.query(Member).count()
+
+    today = (
+        db.query(Member)
+        .filter(Member.created_at >= today_start)
+        .count()
+    )
+
+    this_week = (
+        db.query(Member)
+        .filter(Member.created_at >= week_start)
+        .count()
+    )
+
+    this_month = (
+        db.query(Member)
+        .filter(Member.created_at >= month_start)
+        .count()
+    )
+
+    return MemberStatsResponse(
+        total=total,
+        today=today,
+        this_week=this_week,
+        this_month=this_month,
+    )
+
+
+@app.delete(
+    "/admin/members/{member_id}",
+)
+def delete_member(
+    member_id: int,
+    db: Session = Depends(get_db),
+):
+    member = (
+        db.query(Member)
+        .filter(Member.id == member_id)
+        .first()
+    )
+
+    if not member:
+        raise HTTPException(
+            status_code=404,
+            detail="Member not found.",
+        )
+
+    db.delete(member)
+    db.commit()
+
+    return {
+        "message": "Member deleted successfully.",
+        "id": member_id,
+    }
