@@ -1555,3 +1555,122 @@
     font-size: 1.8rem;
   }
 }
+
+/* =========================================================
+   ADMIN NEWS — ARTICLE LIST OVERFLOW FIX
+   Keeps long titles/content inside the published article card.
+   ========================================================= */
+
+.admin-article-list {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.admin-article-row {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  overflow: hidden;
+}
+
+.admin-article-thumb,
+.admin-article-icon {
+  width: 88px;
+  min-width: 88px;
+  max-width: 88px;
+  height: 88px;
+  box-sizing: border-box;
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+.admin-article-thumb {
+  object-fit: cover;
+}
+
+.admin-article-info {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.admin-article-info h3 {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0 0 8px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+  line-height: 1.25;
+}
+
+.admin-article-category,
+.admin-article-meta {
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.admin-article-actions {
+  min-width: 0;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-article-actions button {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .admin-article-row {
+    grid-template-columns: 72px minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .admin-article-thumb,
+  .admin-article-icon {
+    width: 72px;
+    min-width: 72px;
+    max-width: 72px;
+    height: 72px;
+  }
+
+  .admin-article-actions {
+    grid-column: 2;
+    justify-content: flex-start;
+    width: 100%;
+    margin-top: 4px;
+  }
+}
+
+@media (max-width: 560px) {
+  .admin-article-row {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .admin-article-thumb,
+  .admin-article-icon {
+    width: 64px;
+    min-width: 64px;
+    max-width: 64px;
+    height: 64px;
+  }
+
+  .admin-article-actions {
+    grid-column: 1;
+  }
+}
