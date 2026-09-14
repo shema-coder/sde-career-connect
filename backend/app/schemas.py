@@ -97,3 +97,37 @@ class AdminLoginRequest(BaseModel):
 class AdminLoginResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+class NewsPostBase(BaseModel):
+    slug: str
+    title: str
+    summary: str
+    content: str
+    category: str
+    date: str
+    author: str
+    icon: str = "🎓"
+    image: str | None = None
+    application_link: str | None = None
+    youtube_link: str | None = None
+    whatsapp_link: str | None = None
+    status: str = "draft"
+    featured: bool = False
+    urgent: bool = False
+
+
+class NewsPostCreate(NewsPostBase):
+    pass
+
+
+class NewsPostUpdate(NewsPostBase):
+    pass
+
+
+class NewsPostResponse(NewsPostBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    created_at: datetime
+    updated_at: datetime
+

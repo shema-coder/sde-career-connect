@@ -167,3 +167,109 @@ class StudentApplication(Base):
         onupdate=utc_now,
         nullable=False,
     )
+
+class NewsPost(Base):
+    __tablename__ = "news_posts"
+
+    id: Mapped[int] = mapped_column(
+        Integer,
+        primary_key=True,
+        index=True,
+    )
+
+    slug: Mapped[str] = mapped_column(
+        String(255),
+        unique=True,
+        index=True,
+        nullable=False,
+    )
+
+    title: Mapped[str] = mapped_column(
+        String(500),
+        nullable=False,
+    )
+
+    summary: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+
+    content: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+
+    category: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False,
+        index=True,
+    )
+
+    date: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False,
+    )
+
+    author: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False,
+    )
+
+    icon: Mapped[str] = mapped_column(
+        String(50),
+        nullable=False,
+        default="🎓",
+    )
+
+    image: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    application_link: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    youtube_link: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    whatsapp_link: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    status: Mapped[str] = mapped_column(
+        String(30),
+        nullable=False,
+        default="draft",
+        index=True,
+    )
+
+    featured: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+    )
+
+    urgent: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=utc_now,
+        nullable=False,
+    )
+
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=utc_now,
+        onupdate=utc_now,
+        nullable=False,
+    )
+

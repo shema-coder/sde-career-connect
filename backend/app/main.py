@@ -8,13 +8,16 @@ from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 from .database import Base, engine, get_db
-from .models import StudentApplication
+from .models import NewsPost, StudentApplication
 from .schemas import (
     ApplicationCreate,
     ApplicationCreatedResponse,
     ApplicationResponse,
     AdminApplicationResponse,
     AdminApplicationUpdate,
+    NewsPostCreate,
+    NewsPostResponse,
+    NewsPostUpdate,
 )
 
 
@@ -87,6 +90,242 @@ def health_check():
     return {
         "status": "healthy",
         "service": "sde-career-connect-api",
+    }
+
+
+
+
+def public_news_response(post: NewsPost) -> NewsPostResponse:
+    return NewsPostResponse(
+        id=post.id,
+        slug=post.slug,
+        title=post.title,
+        summary=post.summary,
+        content=post.content,
+        category=post.category,
+        date=post.date,
+        author=post.author,
+        icon=post.icon,
+        image=post.image,
+        application_link=post.application_link,
+        youtube_link=post.youtube_link,
+        whatsapp_link=post.whatsapp_link,
+        status=post.status,
+        featured=post.featured,
+        urgent=post.urgent,
+        created_at=post.created_at,
+        updated_at=post.updated_at,
+    )
+
+
+@app.get(
+    "/news",
+    response_model=list[NewsPostResponse],
+)
+def get_public_news(
+    db: Session = Depends(get_db),
+):
+    posts = (
+        db.query(NewsPost)
+        .filter(NewsPost.status == "published")
+        .order_by(
+            NewsPost.urgent.desc(),
+            NewsPost.featured.desc(),
+            NewsPost.created_at.desc(),
+        )
+        .all()
+    )
+
+    return [public_news_response(post) for post in posts]
+
+
+@app.get(
+    "/news/{slug}",
+    response_model=NewsPostResponse,
+)
+def get_public_news_article(
+    slug: str,
+    db: Session = Depends(get_db),
+):
+    post = (
+        db.query(NewsPost)
+        .filter(
+            NewsPost.slug == slug,
+            NewsPost.status == "published",
+        )
+        .first()
+    )
+
+    if not post:
+        raise HTTPException(
+            status_code=404,
+            detail="News article not found.",
+        )
+
+    return public_news_response(post)
+
+
+@app.get(
+    "/admin/news",
+    response_model=list[NewsPostResponse],
+)
+def get_admin_news(
+    db: Session = Depends(get_db),
+):
+    posts = (
+        db.query(NewsPost)
+        .order_by(NewsPost.created_at.desc())
+        .all()
+    )
+
+    return posts
+
+
+@app.post(
+    "/admin/news",
+    response_model=NewsPostResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_news_post(
+    payload: NewsPostCreate,
+    db: Session = Depends(get_db),
+):
+    existing = (
+        db.query(NewsPost)
+        .filter(NewsPost.slug == payload.slug.strip())
+        .first()
+    )
+
+    if existing:
+        raise HTTPException(
+            status_code=409,
+            detail="A news article with this slug already exists.",
+        )
+
+    allowed_statuses = {"draft", "published"}
+
+    if payload.status not in allowed_statuses:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid news status.",
+        )
+
+    post = NewsPost(
+        slug=payload.slug.strip(),
+        title=payload.title.strip(),
+        summary=payload.summary.strip(),
+        content=payload.content,
+        category=payload.category.strip(),
+        date=payload.date.strip(),
+        author=payload.author.strip(),
+        icon=payload.icon.strip() or "🎓",
+        image=payload.image,
+        application_link=payload.application_link,
+        youtube_link=payload.youtube_link,
+        whatsapp_link=payload.whatsapp_link,
+        status=payload.status,
+        featured=payload.featured,
+        urgent=payload.urgent,
+    )
+
+    db.add(post)
+    db.commit()
+    db.refresh(post)
+
+    return post
+
+
+@app.patch(
+    "/admin/news/{post_id}",
+    response_model=NewsPostResponse,
+)
+def update_news_post(
+    post_id: int,
+    payload: NewsPostUpdate,
+    db: Session = Depends(get_db),
+):
+    post = (
+        db.query(NewsPost)
+        .filter(NewsPost.id == post_id)
+        .first()
+    )
+
+    if not post:
+        raise HTTPException(
+            status_code=404,
+            detail="News article not found.",
+        )
+
+    allowed_statuses = {"draft", "published"}
+
+    if payload.status not in allowed_statuses:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid news status.",
+        )
+
+    duplicate = (
+        db.query(NewsPost)
+        .filter(
+            NewsPost.slug == payload.slug.strip(),
+            NewsPost.id != post_id,
+        )
+        .first()
+    )
+
+    if duplicate:
+        raise HTTPException(
+            status_code=409,
+            detail="A news article with this slug already exists.",
+        )
+
+    post.slug = payload.slug.strip()
+    post.title = payload.title.strip()
+    post.summary = payload.summary.strip()
+    post.content = payload.content
+    post.category = payload.category.strip()
+    post.date = payload.date.strip()
+    post.author = payload.author.strip()
+    post.icon = payload.icon.strip() or "🎓"
+    post.image = payload.image
+    post.application_link = payload.application_link
+    post.youtube_link = payload.youtube_link
+    post.whatsapp_link = payload.whatsapp_link
+    post.status = payload.status
+    post.featured = payload.featured
+    post.urgent = payload.urgent
+
+    db.commit()
+    db.refresh(post)
+
+    return post
+
+
+@app.delete(
+    "/admin/news/{post_id}",
+)
+def delete_news_post(
+    post_id: int,
+    db: Session = Depends(get_db),
+):
+    post = (
+        db.query(NewsPost)
+        .filter(NewsPost.id == post_id)
+        .first()
+    )
+
+    if not post:
+        raise HTTPException(
+            status_code=404,
+            detail="News article not found.",
+        )
+
+    db.delete(post)
+    db.commit()
+
+    return {
+        "message": "News article deleted successfully.",
+        "id": post_id,
     }
 
 
