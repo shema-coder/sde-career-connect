@@ -4,15 +4,13 @@ import {
   type ChangeEvent,
 } from "react";
 import { useNavigate } from "react-router-dom";
-import { newsSeed } from "../../data/newsSeed";
 import type {
   NewsCategory,
   NewsPost,
   NewsStatus,
 } from "../../types/news";
+import { apiRequest } from "../../lib/api";
 import "./Admin.css";
-
-const STORAGE_KEY = "sde-career-connect-news";
 
 function createSlug(title: string): string {
   return title
@@ -57,7 +55,6 @@ export default function AdminNews() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState(emptyPost);
   const [message, setMessage] = useState("");
-  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     const authenticated = localStorage.getItem(
@@ -69,32 +66,18 @@ export default function AdminNews() {
       return;
     }
 
-    const stored = localStorage.getItem(STORAGE_KEY);
-
-    if (stored) {
+    async function loadPosts() {
       try {
-        const parsed = JSON.parse(stored);
-
-        if (Array.isArray(parsed)) {
-          setPosts(parsed);
-        } else {
-          setPosts(newsSeed);
-        }
-      } catch {
-        setPosts(newsSeed);
+        const data = await apiRequest<NewsPost[]>("/admin/news");
+        setPosts(data);
+      } catch (error) {
+        console.error("Failed to load news posts:", error);
+        setMessage("Unable to load articles from the server.");
       }
-    } else {
-      setPosts(newsSeed);
     }
 
-    setLoaded(true);
+    void loadPosts();
   }, [navigate]);
-
-  useEffect(() => {
-    if (loaded) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
-    }
-  }, [posts, loaded]);
 
   function updateField<K extends keyof Omit<NewsPost, "id">>(
     field: K,
@@ -175,7 +158,7 @@ export default function AdminNews() {
     setMessage("");
   }
 
-  function savePost() {
+  async function savePost() {
     if (
       !form.title.trim() ||
       !form.summary.trim() ||
@@ -187,41 +170,90 @@ export default function AdminNews() {
       return;
     }
 
-    if (editingId !== null) {
-      setPosts((current) =>
-        current.map((post) =>
-          post.id === editingId
-            ? { ...post, ...form }
-            : post,
-        ),
-      );
+    const payload = {
+      slug: form.slug || createSlug(form.title),
+      title: form.title,
+      summary: form.summary,
+      content: form.content,
+      category: form.category,
+      date: form.date,
+      author: form.author,
+      icon: form.icon,
+      image: form.image || null,
+      applicationLink: form.applicationLink || null,
+      youtubeLink: form.youtubeLink || null,
+      whatsappLink: form.whatsappLink || null,
+      status: form.status,
+      featured: form.featured,
+      urgent: form.urgent,
+    };
 
-      setMessage("Article updated successfully.");
-    } else {
-      const newPost: NewsPost = {
-        id: Math.max(0, ...posts.map((post) => post.id)) + 1,
-        ...form,
-      };
+    try {
+      if (editingId !== null) {
+        const updatedPost = await apiRequest<NewsPost>(
+          `/admin/news/${editingId}`,
+          {
+            method: "PATCH",
+            body: JSON.stringify(payload),
+          },
+        );
 
-      setPosts((current) => [newPost, ...current]);
-      setMessage("Article created successfully.");
-    }
+        setPosts((current) =>
+          current.map((post) =>
+            post.id === editingId ? updatedPost : post,
+          ),
+        );
 
-    setEditingId(null);
-    setForm(emptyPost);
-  }
+        setMessage("Article updated successfully.");
+      } else {
+        const createdPost = await apiRequest<NewsPost>(
+          "/admin/news",
+          {
+            method: "POST",
+            body: JSON.stringify(payload),
+          },
+        );
 
-  function deletePost(id: number) {
-    setPosts((current) =>
-      current.filter((post) => post.id !== id),
-    );
+        setPosts((current) => [createdPost, ...current]);
+        setMessage("Article created successfully.");
+      }
 
-    if (editingId === id) {
       setEditingId(null);
       setForm(emptyPost);
+    } catch (error) {
+      console.error("Failed to save article:", error);
+      setMessage("Unable to save the article. Please try again.");
+    }
+  }
+
+  async function deletePost(id: number) {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this article?",
+    );
+
+    if (!confirmed) {
+      return;
     }
 
-    setMessage("Article deleted.");
+    try {
+      await apiRequest<void>(`/admin/news/${id}`, {
+        method: "DELETE",
+      });
+
+      setPosts((current) =>
+        current.filter((post) => post.id !== id),
+      );
+
+      if (editingId === id) {
+        setEditingId(null);
+        setForm(emptyPost);
+      }
+
+      setMessage("Article deleted.");
+    } catch (error) {
+      console.error("Failed to delete article:", error);
+      setMessage("Unable to delete the article. Please try again.");
+    }
   }
 
   function logout() {

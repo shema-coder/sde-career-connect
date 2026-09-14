@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { newsSeed } from "./data/newsSeed";
+import { apiRequest } from "./lib/api";
 import type { NewsCategory, NewsPost } from "./types/news";
 import "./App.css";
 import ApplicationSupport from "./pages/ApplicationSupport";
@@ -9,7 +9,6 @@ const WHATSAPP_GROUP =
 
 const WHATSAPP_DIRECT = "https://wa.me/250796371484";
 
-const STORAGE_KEY = "sde-career-connect-news";
 
 const categories: Array<"All" | NewsCategory> = [
   "All",
@@ -21,7 +20,7 @@ const categories: Array<"All" | NewsCategory> = [
 ];
 
 function App() {
-  const [posts, setPosts] = useState<NewsPost[]>(newsSeed);
+  const [posts, setPosts] = useState<NewsPost[]>([]);
   const [menuOpen, setMenuOpen] = useState(false);
   const [showApplicationSupport, setShowApplicationSupport] = useState(false);
   const [applicationSupportView, setApplicationSupportView] =
@@ -30,24 +29,17 @@ function App() {
   const [selectedPost, setSelectedPost] = useState<number | null>(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-
-    if (!saved) {
-      setPosts(newsSeed);
-      return;
-    }
-
-    try {
-      const parsed = JSON.parse(saved);
-
-      if (Array.isArray(parsed)) {
-        setPosts(parsed);
-      } else {
-        setPosts(newsSeed);
+    async function loadPosts() {
+      try {
+        const data = await apiRequest<NewsPost[]>("/news");
+        setPosts(data);
+      } catch (error) {
+        console.error("Failed to load published news:", error);
+        setPosts([]);
       }
-    } catch {
-      setPosts(newsSeed);
     }
+
+    void loadPosts();
   }, []);
 
   const publishedPosts = useMemo(

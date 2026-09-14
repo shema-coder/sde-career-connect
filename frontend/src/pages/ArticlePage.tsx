@@ -1,58 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { newsSeed } from "../data/newsSeed";
+import { apiRequest } from "../lib/api";
 import type { NewsPost } from "../types/news";
-
-const STORAGE_KEY = "sde-career-connect-news";
-
-function createSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .trim()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
-
-function getPosts(): NewsPost[] {
-  const seedPosts = newsSeed.map((post) => ({
-    ...post,
-    slug: post.slug || createSlug(post.title),
-  }));
-
-  const stored = localStorage.getItem(STORAGE_KEY);
-
-  if (!stored) {
-    return seedPosts;
-  }
-
-  try {
-    const parsed = JSON.parse(stored);
-
-    if (!Array.isArray(parsed)) {
-      return seedPosts;
-    }
-
-    const storedPosts: NewsPost[] = parsed.map((post: NewsPost) => ({
-      ...post,
-      slug: post.slug || createSlug(post.title),
-    }));
-
-    // Built-in seed articles are authoritative.
-    // This prevents an older localStorage copy from
-    // breaking public article URLs.
-    const seedIds = new Set(seedPosts.map((post) => post.id));
-
-    const customPosts = storedPosts.filter(
-      (post) => !seedIds.has(post.id),
-    );
-
-    return [...seedPosts, ...customPosts];
-  } catch {
-    return seedPosts;
-  }
-}
 
 function renderArticleContent(content: string) {
   return content.split("\n").map((paragraph, index) => {
@@ -68,7 +17,24 @@ function renderArticleContent(content: string) {
 
 export default function ArticlePage() {
   const { slug } = useParams<{ slug: string }>();
-  const posts = getPosts();
+  const [posts, setPosts] = useState<NewsPost[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadPosts() {
+      try {
+        const data = await apiRequest<NewsPost[]>("/news");
+        setPosts(data);
+      } catch (error) {
+        console.error("Failed to load article:", error);
+        setPosts([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    void loadPosts();
+  }, []);
 
   const post = posts.find(
     (article) =>
@@ -78,10 +44,25 @@ export default function ArticlePage() {
   useEffect(() => {
     if (post) {
       document.title = `${post.title} | SDE Career Connect`;
-    } else {
+    } else if (!loading) {
       document.title = "Article not found | SDE Career Connect";
     }
-  }, [post]);
+  }, [post, loading]);
+
+  if (loading) {
+    return (
+      <main className="public-article-page">
+        <div className="public-article-container">
+          <section className="article-not-found">
+            <span className="public-article-eyebrow">
+              SDE CAREER CONNECT
+            </span>
+            <h1>Loading article...</h1>
+          </section>
+        </div>
+      </main>
+    );
+  }
 
   if (!post) {
     return (
