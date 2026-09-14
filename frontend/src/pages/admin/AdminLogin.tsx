@@ -21,7 +21,7 @@ export default function AdminLogin() {
       password === "SDEAdmin123!"
     ) {
       localStorage.setItem("sde_admin_authenticated", "true");
-      navigate("/admin/news");
+      navigate("/admin/dashboard");
       return;
     }
 
@@ -42,8 +42,7 @@ export default function AdminLogin() {
         <h1>Administrator Login</h1>
 
         <p>
-          Sign in to manage SDE Career Connect news, announcements, and
-          educational opportunities.
+          Sign in to access the SDE Career Connect administration dashboard, manage members, applications, news, and educational opportunities.
         </p>
 
         <form onSubmit={handleSubmit} className="admin-auth-form">
