@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { apiRequest } from "./lib/api";
 import type { NewsCategory, NewsPost } from "./types/news";
 import "./App.css";
@@ -166,6 +167,13 @@ const selectedPostData = publishedPosts.find(
             <a href="#opportunities" onClick={() => setMenuOpen(false)}>
               Opportunities
             </a>
+            <Link
+              to="/find-opportunities"
+              onClick={() => setMenuOpen(false)}
+              className="nav-opportunity-finder"
+            >
+              Find My Opportunities
+            </Link>
             <a
               href="#support"
               onClick={(event) => {
@@ -227,7 +235,14 @@ const selectedPostData = publishedPosts.find(
               </p>
 
               <div className="hero-actions">
-                <a className="button button-yellow" href="#opportunities">
+                <Link
+                  className="button button-yellow finder-hero-button"
+                  to="/find-opportunities"
+                  aria-label="Find your study options"
+                >
+                  🔎 Find Your Study Options →
+                </Link>
+                <a className="button button-outline-light" href="#opportunities">
                   Explore Opportunities ↗
                 </a>
 
@@ -250,6 +265,14 @@ const selectedPostData = publishedPosts.find(
                 >
                   Join Our WhatsApp Group
                 </a>
+              </div>
+
+              <div className="finder-hero-hint">
+                <strong>Not sure what you can study?</strong>
+                <span>
+                  Check programmes, UR & RP options, historical marks,
+                  scholarships and official requirements.
+                </span>
               </div>
 
               <div className="hero-member-register">
