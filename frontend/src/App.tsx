@@ -33,6 +33,24 @@ function App() {
   const [memberCount, setMemberCount] = useState(0);
 
   useEffect(() => {
+    function handleOpenRegistration() {
+      setShowMemberRegistration(true);
+    }
+
+    window.addEventListener(
+      "sde-open-registration",
+      handleOpenRegistration,
+    );
+
+    return () => {
+      window.removeEventListener(
+        "sde-open-registration",
+        handleOpenRegistration,
+      );
+    };
+  }, []);
+
+  useEffect(() => {
     async function loadMemberCount() {
       try {
         const data = await apiRequest<{ count: number }>(

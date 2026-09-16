@@ -4,6 +4,8 @@ import { apiRequest } from "../lib/api";
 import type { NewsPost } from "../types/news";
 
 function renderArticleContent(content: string) {
+  const urlPattern = /(https?:\/\/[^\s]+)/g;
+
   return content.split("\n").map((paragraph, index) => {
     const trimmed = paragraph.trim();
 
@@ -11,7 +13,27 @@ function renderArticleContent(content: string) {
       return <div className="public-article-spacer" key={index} />;
     }
 
-    return <p key={index}>{trimmed}</p>;
+    const parts = trimmed.split(urlPattern);
+
+    return (
+      <p key={index}>
+        {parts.map((part, partIndex) =>
+          /^https?:\/\/[^\s]+$/.test(part) ? (
+            <a
+              key={partIndex}
+              href={part}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="public-article-inline-link"
+            >
+              {part}
+            </a>
+          ) : (
+            part
+          ),
+        )}
+      </p>
+    );
   });
 }
 
@@ -151,56 +173,84 @@ export default function ArticlePage() {
               {renderArticleContent(post.content)}
             </div>
 
-            {(post.applicationLink ||
-              post.youtubeLink ||
-              post.whatsappLink) && (
-              <div className="public-article-actions">
+            <div className="public-article-actions">
+              <div className="public-article-actions-heading">
                 <div>
                   <span className="article-actions-label">
                     TAKE THE NEXT STEP
                   </span>
                   <h2>Ready to move forward?</h2>
-                </div>
-
-                <div className="article-action-buttons">
-                  {post.applicationLink && (
-                    <a
-                      className="article-action-button article-action-primary"
-                      href={post.applicationLink}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Apply now
-                      <span>↗</span>
-                    </a>
-                  )}
-
-                  {post.youtubeLink && (
-                    <a
-                      className="article-action-button article-action-secondary"
-                      href={post.youtubeLink}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Watch video
-                      <span>▶</span>
-                    </a>
-                  )}
-
-                  {post.whatsappLink && (
-                    <a
-                      className="article-action-button article-action-whatsapp"
-                      href={post.whatsappLink}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Join WhatsApp
-                      <span>↗</span>
-                    </a>
-                  )}
+                  <p>
+                    Choose the action that matches what you want to do next.
+                  </p>
                 </div>
               </div>
-            )}
+
+              <div className="article-action-buttons">
+                {post.applicationLink && (
+                  <a
+                    className="article-action-button article-action-primary"
+                    href={post.applicationLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <span className="article-action-icon">↗</span>
+                    <span>
+                      <strong>APPLY NOW</strong>
+                      <small>Start your application</small>
+                    </span>
+                  </a>
+                )}
+
+                {post.youtubeLink && (
+                  <a
+                    className="article-action-button article-action-secondary"
+                    href={post.youtubeLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <span className="article-action-icon">▶</span>
+                    <span>
+                      <strong>WATCH APPLICATION PROCESS</strong>
+                      <small>See how to apply</small>
+                    </span>
+                  </a>
+                )}
+
+                {post.whatsappLink && (
+                  <a
+                    className="article-action-button article-action-whatsapp"
+                    href={post.whatsappLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <span className="article-action-icon">💬</span>
+                    <span>
+                      <strong>JOIN WHATSAPP</strong>
+                      <small>Get student support</small>
+                    </span>
+                  </a>
+                )}
+
+                <Link
+                  className="article-action-button article-action-register"
+                  to="/"
+                  onClick={() => {
+                    window.setTimeout(() => {
+                      window.dispatchEvent(
+                        new CustomEvent("sde-open-registration"),
+                      );
+                    }, 0);
+                  }}
+                >
+                  <span className="article-action-icon">📝</span>
+                  <span>
+                    <strong>REGISTER NOW</strong>
+                    <small>Join SDE Career Connect</small>
+                  </span>
+                </Link>
+              </div>
+            </div>
           </div>
         </article>
 
