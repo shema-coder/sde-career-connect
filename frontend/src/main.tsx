@@ -10,6 +10,7 @@ import AdminNews from "./pages/admin/AdminNews.tsx";
 import AdminApplications from "./pages/admin/AdminApplications.tsx";
 import AdminMembers from "./pages/admin/AdminMembers.tsx";
 import ArticlePage from "./pages/ArticlePage.tsx";
+import OpportunityFinder from "./pages/OpportunityFinder";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -17,6 +18,7 @@ createRoot(document.getElementById("root")!).render(
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/articles/:slug" element={<ArticlePage />} />
+        <Route path="/find-opportunities" element={<OpportunityFinder />} />
         <Route path="/admin" element={<AdminLogin />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/news" element={<AdminNews />} />
