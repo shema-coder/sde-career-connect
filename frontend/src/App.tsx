@@ -42,6 +42,18 @@ function App() {
       handleOpenRegistration,
     );
 
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("register") === "1") {
+      setShowMemberRegistration(true);
+
+      window.history.replaceState(
+        {},
+        "",
+        window.location.pathname,
+      );
+    }
+
     return () => {
       window.removeEventListener(
         "sde-open-registration",

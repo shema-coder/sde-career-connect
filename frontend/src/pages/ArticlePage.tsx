@@ -3,6 +3,14 @@ import { Link, useParams } from "react-router-dom";
 import { apiRequest } from "../lib/api";
 import type { NewsPost } from "../types/news";
 
+function extractUrls(content: string): string[] {
+  const matches = content.match(/https?:\/\/[^\s]+/g) ?? [];
+
+  return matches.map((url) =>
+    url.replace(/[),.;!?]+$/, ""),
+  );
+}
+
 function renderArticleContent(content: string) {
   const urlPattern = /(https?:\/\/[^\s]+)/g;
 
@@ -21,7 +29,7 @@ function renderArticleContent(content: string) {
           /^https?:\/\/[^\s]+$/.test(part) ? (
             <a
               key={partIndex}
-              href={part}
+              href={part.replace(/[),.;!?]+$/, "")}
               target="_blank"
               rel="noopener noreferrer"
               className="public-article-inline-link"
@@ -173,84 +181,101 @@ export default function ArticlePage() {
               {renderArticleContent(post.content)}
             </div>
 
-            <div className="public-article-actions">
-              <div className="public-article-actions-heading">
-                <div>
-                  <span className="article-actions-label">
-                    TAKE THE NEXT STEP
-                  </span>
-                  <h2>Ready to move forward?</h2>
-                  <p>
-                    Choose the action that matches what you want to do next.
-                  </p>
+            {(() => {
+              const urls = extractUrls(post.content);
+
+              const applicationLink =
+                post.applicationLink ||
+                urls.find(
+                  (url) =>
+                    /apply|application/i.test(url) &&
+                    !/youtube\.com|youtu\.be|whatsapp\.com/i.test(url),
+                );
+
+              const youtubeLink =
+                post.youtubeLink ||
+                urls.find((url) =>
+                  /youtube\.com|youtu\.be/i.test(url),
+                );
+
+              const whatsappLink =
+                post.whatsappLink ||
+                urls.find((url) => /chat\.whatsapp\.com|wa\.me/i.test(url));
+
+              return (
+                <div className="public-article-actions">
+                  <div className="public-article-actions-heading">
+                    <div>
+                      <span className="article-actions-label">
+                        TAKE THE NEXT STEP
+                      </span>
+                      <h2>Ready to move forward?</h2>
+                      <p>
+                        Choose the action that matches what you want to do next.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="article-action-buttons">
+                    {applicationLink && (
+                      <a
+                        className="article-action-button article-action-primary"
+                        href={applicationLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <span className="article-action-icon">↗</span>
+                        <span>
+                          <strong>APPLY NOW</strong>
+                          <small>Start your application</small>
+                        </span>
+                      </a>
+                    )}
+
+                    {youtubeLink && (
+                      <a
+                        className="article-action-button article-action-secondary"
+                        href={youtubeLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <span className="article-action-icon">▶</span>
+                        <span>
+                          <strong>WATCH APPLICATION PROCESS</strong>
+                          <small>See how to apply</small>
+                        </span>
+                      </a>
+                    )}
+
+                    {whatsappLink && (
+                      <a
+                        className="article-action-button article-action-whatsapp"
+                        href={whatsappLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <span className="article-action-icon">💬</span>
+                        <span>
+                          <strong>JOIN WHATSAPP</strong>
+                          <small>Get student support</small>
+                        </span>
+                      </a>
+                    )}
+
+                    <a
+                      className="article-action-button article-action-register"
+                      href="/?register=1"
+                    >
+                      <span className="article-action-icon">📝</span>
+                      <span>
+                        <strong>REGISTER NOW</strong>
+                        <small>Join SDE Career Connect</small>
+                      </span>
+                    </a>
+                  </div>
                 </div>
-              </div>
-
-              <div className="article-action-buttons">
-                {post.applicationLink && (
-                  <a
-                    className="article-action-button article-action-primary"
-                    href={post.applicationLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <span className="article-action-icon">↗</span>
-                    <span>
-                      <strong>APPLY NOW</strong>
-                      <small>Start your application</small>
-                    </span>
-                  </a>
-                )}
-
-                {post.youtubeLink && (
-                  <a
-                    className="article-action-button article-action-secondary"
-                    href={post.youtubeLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <span className="article-action-icon">▶</span>
-                    <span>
-                      <strong>WATCH APPLICATION PROCESS</strong>
-                      <small>See how to apply</small>
-                    </span>
-                  </a>
-                )}
-
-                {post.whatsappLink && (
-                  <a
-                    className="article-action-button article-action-whatsapp"
-                    href={post.whatsappLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <span className="article-action-icon">💬</span>
-                    <span>
-                      <strong>JOIN WHATSAPP</strong>
-                      <small>Get student support</small>
-                    </span>
-                  </a>
-                )}
-
-                <Link
-                  className="article-action-button article-action-register"
-                  to="/"
-                  onClick={() => {
-                    window.setTimeout(() => {
-                      window.dispatchEvent(
-                        new CustomEvent("sde-open-registration"),
-                      );
-                    }, 0);
-                  }}
-                >
-                  <span className="article-action-icon">📝</span>
-                  <span>
-                    <strong>REGISTER NOW</strong>
-                    <small>Join SDE Career Connect</small>
-                  </span>
-                </Link>
-              </div>
-            </div>
+              );
+            })()}
           </div>
         </article>
 
