@@ -189,31 +189,34 @@ export default function ArticlePage() {
                 urls.find(
                   (url) =>
                     /apply|application/i.test(url) &&
-                    !/youtube\.com|youtu\.be|whatsapp\.com/i.test(url),
+                    !/youtube\\.com|youtu\\.be|whatsapp\\.com/i.test(url),
                 );
 
               const youtubeLink =
                 post.youtubeLink ||
                 urls.find((url) =>
-                  /youtube\.com|youtu\.be/i.test(url),
+                  /youtube\\.com|youtu\\.be/i.test(url),
                 );
 
               const whatsappLink =
                 post.whatsappLink ||
-                urls.find((url) => /chat\.whatsapp\.com|wa\.me/i.test(url));
+                urls.find((url) =>
+                  /chat\\.whatsapp\\.com|wa\\.me/i.test(url),
+                );
 
               return (
                 <div className="public-article-actions">
                   <div className="public-article-actions-heading">
-                    <div>
-                      <span className="article-actions-label">
-                        TAKE THE NEXT STEP
-                      </span>
-                      <h2>Ready to move forward?</h2>
-                      <p>
-                        Choose the action that matches what you want to do next.
-                      </p>
-                    </div>
+                    <span className="article-actions-label">
+                      TAKE THE NEXT STEP
+                    </span>
+
+                    <h2>Ready to move forward?</h2>
+
+                    <p>
+                      Apply, learn how to apply, connect with us, or register
+                      for SDE Career Connect support.
+                    </p>
                   </div>
 
                   <div className="article-action-buttons">
@@ -225,7 +228,7 @@ export default function ArticlePage() {
                         rel="noopener noreferrer"
                       >
                         <span className="article-action-icon">↗</span>
-                        <span>
+                        <span className="article-action-copy">
                           <strong>APPLY NOW</strong>
                           <small>Start your application</small>
                         </span>
@@ -240,9 +243,9 @@ export default function ArticlePage() {
                         rel="noopener noreferrer"
                       >
                         <span className="article-action-icon">▶</span>
-                        <span>
+                        <span className="article-action-copy">
                           <strong>WATCH APPLICATION PROCESS</strong>
-                          <small>See how to apply</small>
+                          <small>See the application steps</small>
                         </span>
                       </a>
                     )}
@@ -255,7 +258,7 @@ export default function ArticlePage() {
                         rel="noopener noreferrer"
                       >
                         <span className="article-action-icon">💬</span>
-                        <span>
+                        <span className="article-action-copy">
                           <strong>JOIN WHATSAPP</strong>
                           <small>Get student support</small>
                         </span>
@@ -267,7 +270,7 @@ export default function ArticlePage() {
                       href="/?register=1"
                     >
                       <span className="article-action-icon">📝</span>
-                      <span>
+                      <span className="article-action-copy">
                         <strong>REGISTER NOW</strong>
                         <small>Join SDE Career Connect</small>
                       </span>
