@@ -4,34 +4,32 @@ from pydantic import BaseModel, ConfigDict
 
 
 class ApplicationCreate(BaseModel):
-    institution: str
+    request_type: str = "UNIVERSITY_APPLICATION"
+    service_type: str | None = None
+    writing_answers: str | None = None
 
+    # Required for university applications, validated conditionally
+    # by the /applications endpoint.
+    institution: str = ""
     full_names: str
-    gender: str
-
-    province: str
-    district: str
-    sector: str
-    cell: str
-    village: str
-
-    index_number: str
-    national_id: str
-
-    email: str
-    phone: str
-    date_of_birth: str
-    trade_option: str
-
-    disability: str
+    gender: str = ""
+    province: str = ""
+    district: str = ""
+    sector: str = ""
+    cell: str = ""
+    village: str = ""
+    index_number: str = ""
+    national_id: str = ""
+    email: str = ""
+    phone: str = ""
+    date_of_birth: str = ""
+    trade_option: str = ""
+    disability: str = ""
     disability_details: str | None = None
-
-    refugee: str
-
-    faculty1: str
+    refugee: str = ""
+    faculty1: str = ""
     faculty2: str | None = None
     faculty3: str | None = None
-
     consent: bool
 
 
@@ -39,6 +37,8 @@ class ApplicationResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     reference_code: str
+    request_type: str
+    service_type: str | None = None
     institution: str
     status: str
     public_message: str
@@ -54,6 +54,9 @@ class AdminApplicationResponse(BaseModel):
 
     id: int
     reference_code: str
+    request_type: str
+    service_type: str | None = None
+    writing_answers: str | None = None
     institution: str
     full_names: str
     gender: str

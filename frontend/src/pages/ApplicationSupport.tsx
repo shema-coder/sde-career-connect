@@ -1,9 +1,27 @@
 import React, { useEffect, useMemo, useState } from "react";
 import type { ChangeEvent } from "react";
-import { institutionSupportInfo } from "../data/institutionSupport";
+import {
+  HEC_2026_2027_NOTICE,
+  institutionSupportInfo,
+} from "../data/institutionSupport";
 import "./ApplicationSupport.css";
 
-type Institution = "UR" | "RP" | "ALU";
+type Institution =
+  | "UR"
+  | "RP"
+  | "ALU"
+  | "UOK"
+  | "AUCA"
+  | "ULK"
+  | "UTAB"
+  | "ICK"
+  | "INES"
+  | "MKU"
+  | "UTB"
+  | "CUR"
+  | "KEPLER"
+  | "RICA"
+  | "PIASS";
 
 type UploadedFile = {
   name: string;
@@ -68,7 +86,7 @@ const initialData: ApplicationData = {
   consent: false,
 };
 
-const institutionInfo: Record<
+const institutionInfo: Partial<Record<
   Institution,
   {
     name: string;
@@ -78,12 +96,12 @@ const institutionInfo: Record<
     requirements: string[];
     scholarship?: string[];
   }
-> = {
+>> = {
   UR: {
     name: "University of Rwanda",
     short: "UR",
     description: "University admission guidance and programme selection.",
-    logo: "/assets/ur-logo.png",
+    logo: "/assets/universities/ur-logo.png",
     requirements: [
       "Completed Senior 6, TVET or an accepted equivalent qualification.",
       "At least two relevant principal passes for higher-education entry.",
@@ -96,7 +114,7 @@ const institutionInfo: Record<
     name: "Rwanda Polytechnic",
     short: "RP",
     description: "Technical, vocational and applied higher-education guidance.",
-    logo: "/assets/rp-logo.jpeg",
+    logo: "/assets/universities/rp-logo.jpeg",
     requirements: [
       "Completed Senior 6 or an accepted Level 5 TVET qualification.",
       "At least two relevant principal passes may be required.",
@@ -109,7 +127,7 @@ const institutionInfo: Record<
     name: "African Leadership University",
     short: "ALU",
     description: "Admission, programme and scholarship guidance.",
-    logo: "/assets/alu-logo.webp",
+    logo: "/assets/universities/alu-logo.webp",
     requirements: [
       "Accepted secondary-school qualification or equivalent.",
       "Academic requirements depend on the programme selected.",
@@ -124,8 +142,106 @@ const institutionInfo: Record<
       "Scholarship requirements vary by the specific opportunity.",
       "Additional financial or supporting documents may be requested.",
     ],
+
+
+},
+
+  UOK: {
+    name: "University of Kigali",
+    short: "UoK",
+    description: "University admission support, programme guidance and application preparation.",
+    logo: "/assets/universities/uok-logo.webp",
+    requirements: [],
   },
-};
+
+  AUCA: {
+    name: "Adventist University of Central Africa",
+    short: "AUCA",
+    description: "Admission guidance, programme selection and application preparation.",
+    logo: "/assets/universities/auca-logo.webp",
+    requirements: [],
+  },
+
+  ULK: {
+    name: "University of Lay Adventists of Kigali",
+    short: "ULK",
+    description: "Admission guidance, programme selection and application preparation.",
+    logo: "/assets/universities/ulk-logo.webp",
+    requirements: [],
+  },
+
+  UTAB: {
+    name: "University of Technology and Arts of Byumba",
+    short: "UTAB",
+    description: "Admission guidance, programme selection and application preparation.",
+    logo: "/assets/universities/utab-logo.png",
+    requirements: [],
+  },
+
+  ICK: {
+    name: "Institut Catholique de Kabgayi",
+    short: "ICK",
+    description: "Admission guidance, programme selection and application support.",
+    logo: "/assets/universities/ick-logo.webp",
+    requirements: [],
+  },
+
+  INES: {
+    name: "INES-Ruhengeri",
+    short: "INES",
+    description: "Admission guidance, programme selection and application preparation.",
+    logo: "/assets/universities/ines-logo.webp",
+    requirements: [],
+  },
+
+  MKU: {
+    name: "Mount Kigali University",
+    short: "MKU",
+    description: "Admission guidance, programme selection and application preparation.",
+    logo: "/assets/universities/mku-logo.webp",
+    requirements: [],
+  },
+
+  UTB: {
+    name: "University of Tourism, Technology and Business Studies",
+    short: "UTB",
+    description: "Admission guidance, programme selection and application preparation.",
+    logo: "/assets/universities/utb-logo.png",
+    requirements: [],
+  },
+
+  CUR: {
+    name: "Catholic University of Rwanda",
+    short: "CUR",
+    description: "Admission guidance, programme selection and application preparation.",
+    logo: "/assets/universities/cur-logo.webp",
+    requirements: [],
+  },
+
+  KEPLER: {
+    name: "Kepler College",
+    short: "KEPLER",
+    description: "Admission guidance, programme selection and application preparation.",
+    logo: "/assets/universities/kepler-logo.webp",
+    requirements: [],
+  },
+
+  RICA: {
+    name: "Rwanda Institute for Conservation Agriculture",
+    short: "RICA",
+    description: "Admission guidance, programme selection and application preparation.",
+    logo: "/assets/universities/rica-logo.webp",
+    requirements: [],
+  },
+
+  PIASS: {
+    name: "Protestant Institute of Arts and Social Sciences",
+    short: "PIASS",
+    description: "Admission guidance, programme selection and application preparation.",
+    logo: "/assets/universities/piass-logo.jpeg",
+    requirements: [],
+  },
+  };
 
 const steps = [
   { number: 1, title: "Institution", label: "Choose where you want to apply" },
@@ -151,11 +267,13 @@ const maskValue = (value: string) => {
 type ApplicationSupportProps = {
   onClose: () => void;
   initialView?: "form" | "tracking";
+  initialURChoices?: [string, string, string] | null;
 };
 
 const ApplicationSupport: React.FC<ApplicationSupportProps> = ({
   onClose,
   initialView = "form",
+  initialURChoices = null,
 }) => {
   const [data, setData] = useState<ApplicationData>(() => {
     try {
@@ -211,6 +329,22 @@ const ApplicationSupport: React.FC<ApplicationSupportProps> = ({
   }, [data]);
 
   useEffect(() => {
+    if (!initialURChoices || !initialURChoices.some(Boolean)) {
+      return;
+    }
+
+    setData((current) => ({
+      ...current,
+      institution: "UR",
+      faculty1: initialURChoices[0] || "",
+      faculty2: initialURChoices[1] || "",
+      faculty3: initialURChoices[2] || "",
+    }));
+
+    setStep((current) => Math.max(current, 1));
+  }, [initialURChoices]);
+
+  useEffect(() => {
     document.body.classList.add("application-support-open");
 
     return () => {
@@ -223,8 +357,72 @@ const ApplicationSupport: React.FC<ApplicationSupportProps> = ({
     : null;
 
   const selectedSupportInfo = data.institution
-    ? institutionSupportInfo[data.institution]
+    ? institutionSupportInfo[data.institution as keyof typeof institutionSupportInfo] ?? null
     : null;
+
+  const [activeSupportPanel, setActiveSupportPanel] = useState<
+    "eligibility" | "programmes" | "documents" | "funding" | "important" | "support"
+  >("eligibility");
+
+  const readinessChecks = [
+    {
+      label: "Personal details",
+      done: Boolean(
+        data.fullNames.trim() &&
+        data.gender &&
+        data.dateOfBirth,
+      ),
+    },
+    {
+      label: "Contact & location",
+      done: Boolean(
+        data.email.trim() &&
+        data.phone.trim() &&
+        data.province &&
+        data.district &&
+        data.sector &&
+        data.cell &&
+        data.village,
+      ),
+    },
+    {
+      label: "Academic information",
+      done: Boolean(
+        data.indexNumber.trim() ||
+        data.tradeOption.trim(),
+      ),
+    },
+    {
+      label: "Programme choices",
+      done: Boolean(
+        data.faculty1.trim() &&
+        data.faculty2.trim() &&
+        data.faculty3.trim(),
+      ),
+    },
+    {
+      label: "Support information",
+      done: Boolean(
+        data.disability &&
+        data.refugee,
+      ),
+    },
+  ];
+
+  const readinessPercent = Math.round(
+    (readinessChecks.filter((item) => item.done).length /
+      readinessChecks.length) *
+      100,
+  );
+
+  const verificationLabel =
+    selectedSupportInfo?.verificationStatus === "VERIFIED_OFFICIAL"
+      ? "VERIFIED OFFICIAL"
+      : selectedSupportInfo?.verificationStatus ===
+          "VERIFIED_WITH_PROGRAMME_CHECK"
+        ? "VERIFIED + PROGRAMME CHECK"
+        : "GENERAL GUIDANCE";
+
 
   const completion = Math.round((step / steps.length) * 100);
 
@@ -1143,6 +1341,9 @@ const ApplicationSupport: React.FC<ApplicationSupportProps> = ({
               <div className="institution-choice-grid">
                 {(Object.keys(institutionInfo) as Institution[]).map((key) => {
                   const institution = institutionInfo[key];
+
+                  if (!institution) return null;
+
                   const selected = data.institution === key;
 
                   return (
@@ -1154,26 +1355,29 @@ const ApplicationSupport: React.FC<ApplicationSupportProps> = ({
                       }`}
                       onClick={() => {
                         update("institution", key);
+                        setActiveSupportPanel("eligibility");
                         setErrors({});
                       }}
                       aria-pressed={selected}
                     >
                       <div className="smart-institution-card-top">
                         <div className="smart-institution-logo">
-                          <img
-                            src={institution.logo}
-                            alt={`${institution.name} logo`}
-                            onError={(event) => {
-                              event.currentTarget.style.display = "none";
+                          {institution.logo ? (
+                            <img
+                              src={institution.logo}
+                              alt={`${institution.name} logo`}
+                              onError={(event) => {
+                                event.currentTarget.style.display = "none";
 
-                              const fallback =
-                                event.currentTarget.parentElement?.querySelector(
-                                  ".smart-logo-fallback"
-                                );
+                                const fallback =
+                                  event.currentTarget.parentElement?.querySelector(
+                                    ".smart-logo-fallback"
+                                  );
 
-                              fallback?.classList.add("visible");
-                            }}
-                          />
+                                fallback?.classList.add("visible");
+                              }}
+                            />
+                          ) : null}
 
                           <span className="smart-logo-fallback">
                             {institution.short}
@@ -1216,122 +1420,545 @@ const ApplicationSupport: React.FC<ApplicationSupportProps> = ({
               )}
 
               {selectedSupportInfo && (
-                <section className="smart-guidance-card">
+                <section className="smart-admission-dashboard">
 
-                  <div className="smart-guidance-header">
-                    <div className="smart-guidance-title">
-                      <div className="smart-guidance-mini-badge">
-                        {selectedSupportInfo.shortName}
+                  <div className="smart-dashboard-header">
+
+                    <div className="smart-dashboard-identity">
+
+                      <div className="smart-dashboard-logo">
+                        {selectedInstitution?.logo ? (
+                          <img
+                            src={selectedInstitution.logo}
+                            alt={`${selectedSupportInfo.name} logo`}
+                            onError={(event) => {
+                              event.currentTarget.style.display = "none";
+
+                              const fallback =
+                                event.currentTarget.parentElement?.querySelector(
+                                  ".smart-dashboard-logo-fallback",
+                                );
+
+                              fallback?.classList.add("visible");
+                            }}
+                          />
+                        ) : null}
+
+                        <span className="smart-dashboard-logo-fallback">
+                          {selectedSupportInfo.shortName}
+                        </span>
                       </div>
 
-                      <div>
-                        <span className="smart-guidance-eyebrow">
+                      <div className="smart-dashboard-heading">
+
+                        <div className="smart-dashboard-eyebrow">
                           {selectedSupportInfo.eyebrow}
-                        </span>
+                        </div>
 
                         <h2>{selectedSupportInfo.name}</h2>
 
                         <p>{selectedSupportInfo.description}</p>
-                      </div>
-                    </div>
 
-                    <div className="smart-guidance-selected">
-                      <span>✓</span>
-                      Selected
-                    </div>
-                  </div>
+                        <div className="smart-dashboard-meta">
+                          <span className="smart-dashboard-status">
+                            <span>✓</span>
+                            {verificationLabel}
+                          </span>
 
-                  <div className="smart-guidance-body">
-
-                    <div className="smart-guidance-column">
-                      <div className="smart-guidance-column-heading">
-                        <span className="smart-guidance-icon requirements">
-                          ✓
-                        </span>
-
-                        <div>
-                          <strong>Admission requirements</strong>
-                          <small>
+                          <span>
                             {selectedSupportInfo.applicationType}
-                          </small>
+                          </span>
+
+                          <span>
+                            Verified {selectedSupportInfo.lastVerified}
+                          </span>
                         </div>
+
                       </div>
 
-                      <ul>
-                        {selectedSupportInfo.requirements.map((item) => (
-                          <li key={item}>
-                            <span>✓</span>
-                            <span>{item}</span>
-                          </li>
-                        ))}
-                      </ul>
                     </div>
 
-                    <div className="smart-guidance-column">
-                      <div className="smart-guidance-column-heading">
-                        <span className="smart-guidance-icon documents">
-                          ↗
-                        </span>
+                    <div className="smart-dashboard-readiness">
 
-                        <div>
-                          <strong>Documents to prepare</strong>
-                          <small>
-                            Keep your documents clear and readable
-                          </small>
+                      <div
+                        className="smart-readiness-ring"
+                        style={{
+                          background: `conic-gradient(var(--sde-green) ${readinessPercent * 3.6}deg, #e8edf3 0deg)`,
+                        }}
+                      >
+                        <div className="smart-readiness-ring-inner">
+                          <strong>{readinessPercent}%</strong>
+                          <span>ready</span>
                         </div>
                       </div>
 
-                      <ul>
-                        {selectedSupportInfo.documents.map((item) => (
-                          <li key={item}>
-                            <span>✓</span>
-                            <span>{item}</span>
-                          </li>
-                        ))}
-                      </ul>
+                      <div>
+                        <span>APPLICATION</span>
+                        <strong>Preparation readiness</strong>
+                        <small>
+                          Complete the form to prepare your support request.
+                        </small>
+                      </div>
+
                     </div>
 
                   </div>
 
-                  {selectedSupportInfo.important.length > 0 && (
-                    <div className="smart-guidance-important">
-                      <div className="smart-guidance-alert-icon">!</div>
+                  <div className="smart-hec-notice">
+
+                    <div className="smart-hec-icon">!</div>
+
+                    <div className="smart-hec-content">
+
+                      <div className="smart-hec-title-row">
+
+                        <div>
+                          <strong>
+                            {HEC_2026_2027_NOTICE.title}
+                          </strong>
+
+                          <span>
+                            {HEC_2026_2027_NOTICE.date} •{" "}
+                            {HEC_2026_2027_NOTICE.academicYear}
+                          </span>
+                        </div>
+
+                        <span className="smart-hec-badge">
+                          HEC BASELINE
+                        </span>
+
+                      </div>
+
+                      <ul>
+                        {HEC_2026_2027_NOTICE.rules.map((rule) => (
+                          <li key={rule}>
+                            <span>✓</span>
+                            <span>{rule}</span>
+                          </li>
+                        ))}
+                      </ul>
+
+                    </div>
+
+                  </div>
+
+                  {selectedSupportInfo.verificationStatus ===
+                    "GENERAL_GUIDANCE_ONLY" && (
+                    <div className="smart-dashboard-warning">
+                      <span>⚠</span>
 
                       <div>
                         <strong>
-                          Important for {selectedSupportInfo.shortName}
+                          Confirmation needed before applying
                         </strong>
 
-                        <ul>
-                          {selectedSupportInfo.important.map((item) => (
-                            <li key={item}>{item}</li>
-                          ))}
-                        </ul>
+                        <p>
+                          This section currently provides general guidance.
+                          Exact programme rules should be confirmed with the
+                          institution before you submit an official application.
+                        </p>
                       </div>
                     </div>
                   )}
 
-                  {selectedSupportInfo.scholarship.length > 0 && (
-                    <div className="smart-guidance-scholarship">
-                      <div className="smart-guidance-scholarship-icon">
-                        ✦
+                  <div className="smart-dashboard-tabs" role="tablist">
+
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={activeSupportPanel === "eligibility"}
+                      className={
+                        activeSupportPanel === "eligibility"
+                          ? "is-active"
+                          : ""
+                      }
+                      onClick={() =>
+                        setActiveSupportPanel("eligibility")
+                      }
+                    >
+                      <span>✓</span>
+                      <strong>Eligibility</strong>
+                      <small>Requirements</small>
+                    </button>
+
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={activeSupportPanel === "programmes"}
+                      className={
+                        activeSupportPanel === "programmes"
+                          ? "is-active"
+                          : ""
+                      }
+                      onClick={() =>
+                        setActiveSupportPanel("programmes")
+                      }
+                    >
+                      <span>⌘</span>
+                      <strong>Programmes</strong>
+                      <small>Study choices</small>
+                    </button>
+
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={activeSupportPanel === "documents"}
+                      className={
+                        activeSupportPanel === "documents"
+                          ? "is-active"
+                          : ""
+                      }
+                      onClick={() =>
+                        setActiveSupportPanel("documents")
+                      }
+                    >
+                      <span>↗</span>
+                      <strong>Documents</strong>
+                      <small>Prepare files</small>
+                    </button>
+
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={activeSupportPanel === "funding"}
+                      className={
+                        activeSupportPanel === "funding"
+                          ? "is-active"
+                          : ""
+                      }
+                      onClick={() =>
+                        setActiveSupportPanel("funding")
+                      }
+                    >
+                      <span>✦</span>
+                      <strong>Funding</strong>
+                      <small>Scholarships</small>
+                    </button>
+
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={activeSupportPanel === "important"}
+                      className={
+                        activeSupportPanel === "important"
+                          ? "is-active"
+                          : ""
+                      }
+                      onClick={() =>
+                        setActiveSupportPanel("important")
+                      }
+                    >
+                      <span>!</span>
+                      <strong>Important</strong>
+                      <small>Before applying</small>
+                    </button>
+
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={activeSupportPanel === "support"}
+                      className={
+                        activeSupportPanel === "support"
+                          ? "is-active"
+                          : ""
+                      }
+                      onClick={() =>
+                        setActiveSupportPanel("support")
+                      }
+                    >
+                      <span>?</span>
+                      <strong>SDE Help</strong>
+                      <small>Our support</small>
+                    </button>
+
+                  </div>
+
+                  <div className="smart-dashboard-panel">
+
+                    {activeSupportPanel === "eligibility" && (
+                      <div className="smart-panel-content">
+
+                        <div className="smart-panel-heading">
+                          <div className="smart-panel-icon requirements">
+                            ✓
+                          </div>
+
+                          <div>
+                            <span>CHECK THIS FIRST</span>
+                            <h3>Admission requirements</h3>
+                            <p>
+                              Review the available guidance before continuing.
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="smart-panel-list">
+                          {selectedSupportInfo.requirements.map((item) => (
+                            <div
+                              className="smart-panel-list-item"
+                              key={item}
+                            >
+                              <span>✓</span>
+                              <p>{item}</p>
+                            </div>
+                          ))}
+                        </div>
+
                       </div>
+                    )}
+
+                    {activeSupportPanel === "programmes" && (
+                      <div className="smart-panel-content">
+
+                        <div className="smart-panel-heading">
+                          <div className="smart-panel-icon programmes">
+                            ⌘
+                          </div>
+
+                          <div>
+                            <span>CHOOSE CAREFULLY</span>
+                            <h3>Programme guidance</h3>
+                            <p>
+                              Use this information to prepare your study choices.
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="smart-panel-list">
+                          {selectedSupportInfo.choices.length > 0 ? (
+                            selectedSupportInfo.choices.map((item) => (
+                              <div
+                                className="smart-panel-list-item"
+                                key={item}
+                              >
+                                <span>→</span>
+                                <p>{item}</p>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="smart-panel-empty">
+                              Programme-choice guidance is not currently
+                              available here. SDE can help you check the
+                              institution's current programme information.
+                            </div>
+                          )}
+                        </div>
+
+                      </div>
+                    )}
+
+                    {activeSupportPanel === "documents" && (
+                      <div className="smart-panel-content">
+
+                        <div className="smart-panel-heading">
+                          <div className="smart-panel-icon documents">
+                            ↗
+                          </div>
+
+                          <div>
+                            <span>GET READY</span>
+                            <h3>Documents to prepare</h3>
+                            <p>
+                              Keep your documents clear, complete and readable.
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="smart-panel-list">
+                          {selectedSupportInfo.documents.map((item) => (
+                            <div
+                              className="smart-panel-list-item"
+                              key={item}
+                            >
+                              <span>✓</span>
+                              <p>{item}</p>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="smart-document-note">
+                          <span>ⓘ</span>
+                          <p>
+                            SDE's current form records your information, but
+                            uploaded documents are not yet transmitted to the
+                            SDE server by this form.
+                          </p>
+                        </div>
+
+                      </div>
+                    )}
+
+                    {activeSupportPanel === "funding" && (
+                      <div className="smart-panel-content">
+
+                        <div className="smart-panel-heading">
+                          <div className="smart-panel-icon funding">
+                            ✦
+                          </div>
+
+                          <div>
+                            <span>FUNDING OPTIONS</span>
+                            <h3>Scholarships & financial aid</h3>
+                            <p>
+                              Funding information currently listed for this
+                              institution.
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="smart-panel-list">
+                          {selectedSupportInfo.scholarship.length > 0 ? (
+                            selectedSupportInfo.scholarship.map((item) => (
+                              <div
+                                className="smart-panel-list-item"
+                                key={item}
+                              >
+                                <span>✦</span>
+                                <p>{item}</p>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="smart-panel-empty">
+                              No scholarship information is currently listed
+                              here. SDE can help check funding opportunities
+                              separately.
+                            </div>
+                          )}
+                        </div>
+
+                      </div>
+                    )}
+
+                    {activeSupportPanel === "important" && (
+                      <div className="smart-panel-content">
+
+                        <div className="smart-panel-heading">
+                          <div className="smart-panel-icon important">
+                            !
+                          </div>
+
+                          <div>
+                            <span>READ BEFORE APPLYING</span>
+                            <h3>Important information</h3>
+                            <p>
+                              Rules and reminders that may affect your
+                              application.
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="smart-panel-list">
+                          {selectedSupportInfo.important.length > 0 ? (
+                            selectedSupportInfo.important.map((item) => (
+                              <div
+                                className="smart-panel-list-item"
+                                key={item}
+                              >
+                                <span>!</span>
+                                <p>{item}</p>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="smart-panel-empty">
+                              No additional important notes are currently
+                              listed.
+                            </div>
+                          )}
+                        </div>
+
+                      </div>
+                    )}
+
+                    {activeSupportPanel === "support" && (
+                      <div className="smart-panel-content">
+
+                        <div className="smart-panel-heading">
+                          <div className="smart-panel-icon support">
+                            ?
+                          </div>
+
+                          <div>
+                            <span>SDE CAREER CONNECT</span>
+                            <h3>How SDE can help you</h3>
+                            <p>
+                              We help you understand the process and prepare
+                              your application information.
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="smart-support-message">
+                          <span>💡</span>
+                          <p>{selectedSupportInfo.supportNote}</p>
+                        </div>
+
+                        <div className="smart-support-actions">
+
+                          {selectedSupportInfo.officialApplicationUrl && (
+                            <a
+                              href={selectedSupportInfo.officialApplicationUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="smart-official-button"
+                            >
+                              Official application
+                              <span>↗</span>
+                            </a>
+                          )}
+
+                          {selectedSupportInfo.officialWebsite && (
+                            <a
+                              href={selectedSupportInfo.officialWebsite}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="smart-website-button"
+                            >
+                              Official website
+                              <span>↗</span>
+                            </a>
+                          )}
+
+                        </div>
+
+                      </div>
+                    )}
+
+                  </div>
+
+                  <div className="smart-readiness-checklist">
+
+                    <div className="smart-checklist-heading">
 
                       <div>
-                        <strong>Scholarships & financial aid</strong>
-
-                        <ul>
-                          {selectedSupportInfo.scholarship.map((item) => (
-                            <li key={item}>{item}</li>
-                          ))}
-                        </ul>
+                        <span>YOUR PREPARATION</span>
+                        <strong>Application readiness</strong>
                       </div>
-                    </div>
-                  )}
 
-                  <div className="smart-guidance-support">
-                    <span>💡</span>
-                    <p>{selectedSupportInfo.supportNote}</p>
+                      <b>{readinessPercent}%</b>
+
+                    </div>
+
+                    <div className="smart-checklist-track">
+                      <div
+                        className="smart-checklist-fill"
+                        style={{ width: `${readinessPercent}%` }}
+                      />
+                    </div>
+
+                    <div className="smart-checklist-items">
+                      {readinessChecks.map((item) => (
+                        <div
+                          className={`smart-checklist-item ${
+                            item.done ? "done" : ""
+                          }`}
+                          key={item.label}
+                        >
+                          <span>{item.done ? "✓" : "○"}</span>
+                          {item.label}
+                        </div>
+                      ))}
+                    </div>
+
                   </div>
 
                 </section>
@@ -1683,11 +2310,20 @@ const ApplicationSupport: React.FC<ApplicationSupportProps> = ({
           {step === 4 && (
             <section className="form-step">
               <div className="intro-block">
-                <span className="section-tag">YOUR CHOICES</span>
-                <h1>What would you like to study?</h1>
+                <span className="section-tag">
+                  {data.institution === "UR"
+                    ? "UR PROGRAMME PREFERENCES"
+                    : "YOUR CHOICES"}
+                </span>
+                <h1>
+                  {data.institution === "UR"
+                    ? "Review your 3 programme choices."
+                    : "What would you like to study?"}
+                </h1>
                 <p>
-                  Give us three options. If you are not sure, don't worry —
-                  we can help you identify suitable programmes.
+                  {data.institution === "UR"
+                    ? "These are the programme preferences you selected in the SDE Opportunity Finder. Your order matters."
+                    : "Give us three options. If you are not sure, don't worry — we can help you identify suitable programmes."}
                 </p>
               </div>
 
@@ -1724,64 +2360,191 @@ const ApplicationSupport: React.FC<ApplicationSupportProps> = ({
               </div>
 
               <div className="form-section choices-section">
-                <div className="form-section-heading">
-                  <span>02</span>
-                  <div>
-                    <h3>FACULTIES / PROGRAMMES UZIGA — 3 OPTIONS</h3>
-                    <p>
-                      NIBA UTAZI IZIBA MURI RP ZOSE URATWAIKIRA TUZIGUHE.
-                    </p>
+                {data.institution === "UR" &&
+                initialURChoices &&
+                initialURChoices.some(Boolean) ? (
+                  <div className="ur-imported-choices">
+                    <div className="ur-imported-header">
+                      <div className="ur-imported-brand">
+                        <div className="ur-imported-logo">
+                          <img
+                            src="/assets/universities/ur-logo.png"
+                            alt="University of Rwanda"
+                          />
+                        </div>
+                        <div>
+                          <span className="ur-imported-kicker">
+                            UNIVERSITY OF RWANDA
+                          </span>
+                          <h3>Your programme preferences</h3>
+                          <p>
+                            These choices were imported automatically from the
+                            SDE Opportunity Finder.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="ur-imported-status">
+                        <span className="ur-imported-status-dot" />
+                        <span>3 CHOICES IMPORTED</span>
+                      </div>
+                    </div>
+
+                    <div className="ur-imported-notice">
+                      <span className="ur-imported-notice-icon">✓</span>
+                      <div>
+                        <strong>No retyping required</strong>
+                        <p>
+                          SDE has carried your three ordered programme choices
+                          into this application-support request.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="ur-imported-choice-list">
+                      {[
+                        {
+                          number: "01",
+                          label: "CHOICE 1",
+                          value: data.faculty1,
+                          medal: "🥇",
+                        },
+                        {
+                          number: "02",
+                          label: "CHOICE 2",
+                          value: data.faculty2,
+                          medal: "🥈",
+                        },
+                        {
+                          number: "03",
+                          label: "CHOICE 3",
+                          value: data.faculty3,
+                          medal: "🥉",
+                        },
+                      ].map((choice) => (
+                        <article
+                          key={choice.number}
+                          className="ur-imported-choice-card"
+                        >
+                          <div className="ur-imported-choice-medal">
+                            {choice.medal}
+                          </div>
+
+                          <div className="ur-imported-choice-number">
+                            {choice.number}
+                          </div>
+
+                          <div className="ur-imported-choice-content">
+                            <span>{choice.label}</span>
+                            <strong>
+                              {choice.value || "Programme not selected"}
+                            </strong>
+                          </div>
+
+                          <div className="ur-imported-choice-check">
+                            ✓
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+
+                    <div className="ur-imported-footer">
+                      <div>
+                        <strong>Your order matters.</strong>
+                        <span>
+                          Choice 1 is your first preference, followed by
+                          Choice 2 and Choice 3.
+                        </span>
+                      </div>
+
+                      <a
+                        href="https://wa.me/250796371484"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Need to change a choice? Contact SDE ↗
+                      </a>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <>
+                    <div className="form-section-heading">
+                      <span>02</span>
+                      <div>
+                        <h3>PROGRAMME PREFERENCES — 3 OPTIONS</h3>
+                        <p>
+                          Select or enter your preferred programmes in order.
+                          If you are unsure, SDE can help you choose.
+                        </p>
+                      </div>
+                    </div>
 
-                <div className="help-note">
-                  <span>💡</span>
-                  <div>
-                    <strong>Not sure what to choose?</strong>
-                    <p>
-                      That's completely okay. Write “I NEED HELP” in one of
-                      your choices and our team can guide you.
-                    </p>
-                    <a
-                      href="https://wa.me/250796371484"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Get programme guidance on WhatsApp ↗
-                    </a>
-                  </div>
-                </div>
+                    <div className="help-note">
+                      <span>💡</span>
+                      <div>
+                        <strong>Not sure what to choose?</strong>
+                        <p>
+                          That's completely okay. Our team can guide you based
+                          on your qualification, subjects and interests.
+                        </p>
+                        <a
+                          href="https://wa.me/250796371484"
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          Get programme guidance on WhatsApp ↗
+                        </a>
+                      </div>
+                    </div>
 
-                <div className="faculty-list">
-                  <ChoiceField
-                    number="01"
-                    label="FIRST OPTION"
-                    value={data.faculty1}
-                    error={errors.faculty1}
-                    onChange={(value) => update("faculty1", value)}
-                    placeholder="Enter faculty / programme"
-                  />
+                    <div className="faculty-list">
+                      <ChoiceField
+                        number="01"
+                        label="FIRST OPTION"
+                        value={data.faculty1}
+                        error={errors.faculty1}
+                        onChange={(value) => update("faculty1", value)}
+                        placeholder="Enter faculty / programme"
+                      />
 
-                  <ChoiceField
-                    number="02"
-                    label="SECOND OPTION"
-                    value={data.faculty2}
-                    error={errors.faculty2}
-                    onChange={(value) => update("faculty2", value)}
-                    placeholder="Enter faculty / programme"
-                  />
+                      <ChoiceField
+                        number="02"
+                        label="SECOND OPTION"
+                        value={data.faculty2}
+                        error={errors.faculty2}
+                        onChange={(value) => update("faculty2", value)}
+                        placeholder="Enter faculty / programme"
+                      />
 
-                  <ChoiceField
-                    number="03"
-                    label="THIRD OPTION"
-                    value={data.faculty3}
-                    error={errors.faculty3}
-                    onChange={(value) => update("faculty3", value)}
-                    placeholder="Enter faculty / programme"
-                  />
-                </div>
+                      <ChoiceField
+                        number="03"
+                        label="THIRD OPTION"
+                        value={data.faculty3}
+                        error={errors.faculty3}
+                        onChange={(value) => update("faculty3", value)}
+                        placeholder="Enter faculty / programme"
+                      />
+                    </div>
+                  </>
+                )}
               </div>
             </section>
+          )}
+
+
+          {step === 4 && data.institution === "UR" && (
+            <div className="ur-support-bottom-note">
+              <span className="ur-support-bottom-note-icon">ⓘ</span>
+              <div>
+                <strong>SDE PROGRAMME PLANNING</strong>
+                <p>
+                  Your three choices are your SDE planning preferences. Final
+                  programme availability, eligibility and admission decisions
+                  remain subject to the University of Rwanda's official
+                  admission process and requirements.
+                </p>
+              </div>
+            </div>
           )}
 
           {step === 5 && (

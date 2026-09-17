@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local development backups — never commit
+backups/
+*.backup
+*.backup-*
+*.before-*

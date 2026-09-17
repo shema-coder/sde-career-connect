@@ -12,13 +12,23 @@ import AdminMembers from "./pages/admin/AdminMembers.tsx";
 import ArticlePage from "./pages/ArticlePage.tsx";
 import OpportunityFinder from "./pages/OpportunityFinder";
 
+import WritingHelp from "./pages/WritingHelp";
+import URApplicationSupport from "./pages/URApplicationSupport";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/articles/:slug" element={<ArticlePage />} />
-        <Route path="/find-opportunities" element={<OpportunityFinder />} />
+        <Route
+            path="/find-opportunities"
+            element={<OpportunityFinder />}
+          />
+          <Route
+            path="/writing-help"
+            element={<WritingHelp />}
+          />
+        <Route path="/apply/ur" element={<URApplicationSupport />} />
         <Route path="/admin" element={<AdminLogin />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/news" element={<AdminNews />} />

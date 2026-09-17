@@ -31,6 +31,23 @@ class StudentApplication(Base):
         nullable=False,
     )
 
+    request_type: Mapped[str] = mapped_column(
+        String(50),
+        default="UNIVERSITY_APPLICATION",
+        nullable=False,
+        index=True,
+    )
+
+    service_type: Mapped[str | None] = mapped_column(
+        String(100),
+        nullable=True,
+    )
+
+    writing_answers: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
     institution: Mapped[str] = mapped_column(
         String(20),
         nullable=False,

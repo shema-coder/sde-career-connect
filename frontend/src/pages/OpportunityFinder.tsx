@@ -1,4 +1,14 @@
+import React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  EMPTY_UR_CHOICES,
+  areURChoicesComplete,
+  hasDuplicateURChoices,
+  setURChoice,
+  type URPreference,
+  type URProgrammeChoice,
+  type URThreeChoices,
+} from "../data/universities/urChoices";
 
 type Pathway =
   | "General Education"
@@ -967,7 +977,38 @@ function StatusBadge({ status }: { status: MatchStatus }) {
 }
 
 export default function OpportunityFinder() {
-  const [pathway, setPathway] = useState<Pathway>("General Education");
+
+  // =========================================================
+  // UR — THREE ORDERED PROGRAMME CHOICES
+  // =========================================================
+  const [urChoices, setUrChoices] =
+    React.useState<URThreeChoices>(EMPTY_UR_CHOICES);
+
+  const [showURChoicesReview, setShowURChoicesReview] =
+    React.useState(false);
+
+  const [urChoiceToChange, setURChoiceToChange] =
+    React.useState<URPreference | null>(null);
+
+  const handleURChoice = (
+    preference: URPreference,
+    programme: URProgrammeChoice | null,
+  ) => {
+    setUrChoices((current: URThreeChoices) =>
+      setURChoice(current, preference, programme),
+    );
+  };
+
+  const selectedURChoices =
+    urChoices.filter(Boolean) as URProgrammeChoice[];
+
+  const urChoicesComplete =
+    areURChoicesComplete(urChoices);
+
+  const urHasDuplicate =
+    hasDuplicateURChoices(urChoices);
+
+const [pathway, setPathway] = useState<Pathway>("General Education");
   const [qualification, setQualification] = useState("");
   const [marks, setMarks] = useState("");
   const [field, setField] = useState<Field>("Show me everything");
@@ -1423,6 +1464,15 @@ export default function OpportunityFinder() {
                           programme={programme}
                           marks={numericMarks}
                           hasMarks={canCompareMarks}
+                          onChooseUR={(preference) =>
+                            handleURChoice(preference, {
+                              preference,
+                              programmeId: programme.id,
+                              programmeName: programme.programme,
+                              programmeCode: programme.id,
+                            })
+                          }
+                          selectedURChoices={urChoices}
                         />
                       ))}
                     </div>
@@ -1656,7 +1706,275 @@ export default function OpportunityFinder() {
           </span>
         </div>
       </footer>
-    </main>
+
+        <section className="ur-three-choice-panel">
+          <div className="ur-three-choice-heading">
+            <div>
+              <span className="ur-three-choice-kicker">
+                UR APPLICATION
+              </span>
+
+              <h2>Choose Your 3 Programme Preferences</h2>
+
+              <p>
+                Select three different programmes and arrange them
+                in the order you want them considered.
+              </p>
+            </div>
+
+            <div className="ur-choice-counter">
+              <strong>{selectedURChoices.length}</strong>
+              <span>/ 3 choices</span>
+            </div>
+          </div>
+
+          <div className="ur-choice-grid">
+            {[1, 2, 3].map((number) => {
+              const preference = number as URPreference;
+              const selected = urChoices[preference - 1];
+
+              return (
+                <article
+                  className={`ur-choice-card ur-choice-${number}`}
+                  key={number}
+                >
+                  <div className="ur-choice-number">
+                    {number === 1
+                      ? "🥇"
+                      : number === 2
+                        ? "🥈"
+                        : "🥉"}
+                  </div>
+
+                  <div className="ur-choice-card-content">
+                    <span className="ur-choice-label">
+                      CHOICE {number}
+                    </span>
+
+                    <h3>
+                      {selected?.programmeName ||
+                        "No programme selected"}
+                    </h3>
+
+                    {selected?.programmeCode && (
+                      <span className="ur-choice-code">
+                        {selected.programmeCode}
+                      </span>
+                    )}
+
+                    <div className="ur-choice-status">
+                      {selected
+                        ? "✓ Programme selected"
+                        : "Choose a programme from your results"}
+                    </div>
+
+                    {selected && (
+                      <button
+                        type="button"
+                        className="ur-choice-remove"
+                        onClick={() =>
+                          handleURChoice(preference, null)
+                        }
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+
+          {urHasDuplicate && (
+            <div className="ur-choice-warning">
+              ⚠️ Each programme can only be selected once.
+            </div>
+          )}
+
+          <div className="ur-choice-footer">
+            <div>
+              <strong>Your order matters.</strong>
+              <span>
+                Choice 1 = first preference · Choice 2 = second
+                preference · Choice 3 = third preference
+              </span>
+            </div>
+
+            <button
+              type="button"
+              className="ur-choice-review-button"
+              disabled={!urChoicesComplete || urHasDuplicate}
+              onClick={() => {
+                setShowURChoicesReview(true);
+                setURChoiceToChange(null);
+              }}
+            >
+              REVIEW MY 3 CHOICES →
+            </button>
+          </div>
+        </section>
+
+        {showURChoicesReview && (
+          <div
+            className="ur-review-overlay"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ur-review-title"
+            onClick={(event) => {
+              if (event.target === event.currentTarget) {
+                setShowURChoicesReview(false);
+              }
+            }}
+          >
+            <section className="ur-review-modal">
+              <button
+                type="button"
+                className="ur-review-close"
+                aria-label="Close review"
+                onClick={() => setShowURChoicesReview(false)}
+              >
+                ×
+              </button>
+
+              <div className="ur-review-header">
+                <span className="ur-review-kicker">
+                  UR ADMISSION PLANNER
+                </span>
+
+                <h2 id="ur-review-title">
+                  Review Your 3 Programme Choices
+                </h2>
+
+                <p>
+                  Check your order carefully before confirming your
+                  preferences. Choice 1 is your first preference.
+                </p>
+              </div>
+
+              <div className="ur-review-list">
+                {urChoices.map((choice, index) => {
+                  const preference = (index + 1) as URPreference;
+
+                  return (
+                    <article
+                      key={preference}
+                      className={`ur-review-choice ur-review-choice-${preference}`}
+                    >
+                      <div className="ur-review-choice-number">
+                        {preference === 1
+                          ? "🥇"
+                          : preference === 2
+                            ? "🥈"
+                            : "🥉"}
+                      </div>
+
+                      <div className="ur-review-choice-content">
+                        <span className="ur-review-choice-label">
+                          CHOICE {preference}
+                        </span>
+
+                        {choice ? (
+                          <>
+                            <h3>{choice.programmeName}</h3>
+
+                            {choice.programmeCode && (
+                              <span className="ur-review-code">
+                                {choice.programmeCode}
+                              </span>
+                            )}
+                          </>
+                        ) : (
+                          <h3 className="ur-review-empty">
+                            No programme selected
+                          </h3>
+                        )}
+                      </div>
+
+                      <div className="ur-review-choice-actions">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setURChoiceToChange(preference);
+                            setShowURChoicesReview(false);
+                          }}
+                        >
+                          CHANGE
+                        </button>
+
+                        {choice && (
+                          <button
+                            type="button"
+                            className="ur-review-remove"
+                            onClick={() => {
+                              handleURChoice(preference, null);
+                            }}
+                          >
+                            REMOVE
+                          </button>
+                        )}
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+
+              {urChoiceToChange && (
+                <div className="ur-review-change-notice">
+                  <strong>
+                    Choice {urChoiceToChange} is ready to change.
+                  </strong>
+                  <span>
+                    Return to the programme list and choose a different
+                    programme for this preference.
+                  </span>
+                </div>
+              )}
+
+              <div className="ur-review-footer">
+                <button
+                  type="button"
+                  className="ur-review-secondary"
+                  onClick={() => setShowURChoicesReview(false)}
+                >
+                  ← EDIT CHOICES
+                </button>
+
+                <button
+                  type="button"
+                  className="ur-review-confirm"
+                  disabled={!urChoicesComplete || urHasDuplicate}
+                  onClick={() => {
+                    const choices = urChoices.map((choice) =>
+                      choice
+                        ? {
+                            programmeId: choice.programmeId,
+                            programmeName: choice.programmeName,
+                            programmeCode: choice.programmeCode || "",
+                          }
+                        : null,
+                    );
+
+                    sessionStorage.setItem(
+                      "sde:confirmed-ur-choices",
+                      JSON.stringify(choices),
+                    );
+
+                    sessionStorage.setItem(
+                      "sde:open-application-support",
+                      "UR",
+                    );
+
+                    window.location.href = "/?applicationSupport=1";
+                  }}
+                >
+                  CONFIRM 3 CHOICES ✓
+                </button>
+              </div>
+            </section>
+          </div>
+        )}
+
+        </main>
   );
 }
 
@@ -1664,10 +1982,14 @@ function ProgrammeCard({
   programme,
   marks,
   hasMarks,
+  onChooseUR,
+  selectedURChoices = EMPTY_UR_CHOICES,
 }: {
   programme: Programme;
   marks: number;
   hasMarks: boolean;
+  onChooseUR?: (preference: URPreference) => void;
+  selectedURChoices?: URThreeChoices;
 }) {
   const hasHistorical =
     typeof programme.historicalCutoff === "number";
@@ -1679,12 +2001,41 @@ function ProgrammeCard({
         : "below"
       : null;
 
+  const selectedPreference = selectedURChoices.find(
+    (choice) => choice?.programmeId === programme.id,
+  )?.preference;
+
+  const selectedInAnotherChoice =
+    Boolean(selectedPreference);
+
+  const availablePreferences = ([1, 2, 3] as URPreference[]).filter(
+    (preference) =>
+      !selectedURChoices[preference - 1],
+  );
+
   return (
-    <article className="smart-programme-card">
+    <article
+      className={`smart-programme-card ${
+        selectedInAnotherChoice
+          ? "ur-programme-selected"
+          : ""
+      }`}
+    >
       <div className="smart-card-top">
         <InstitutionBadge institution={programme.institution} />
         <StatusBadge status={programme.status} />
       </div>
+
+      {selectedPreference && (
+        <div className="ur-selected-ribbon">
+          {selectedPreference === 1
+            ? "🥇"
+            : selectedPreference === 2
+              ? "🥈"
+              : "🥉"}{" "}
+          CHOICE {selectedPreference}
+        </div>
+      )}
 
       <h3>{programme.programme}</h3>
 
@@ -1729,7 +2080,10 @@ function ProgrammeCard({
 
           <p>
             {programme.historicalNote ||
-              `Reference from ${programme.historicalYear || "a previous admission cycle"}.`}
+              `Reference from ${
+                programme.historicalYear ||
+                "a previous admission cycle"
+              }.`}
           </p>
 
           {comparison === "above" && (
@@ -1755,6 +2109,73 @@ function ProgrammeCard({
         </div>
       )}
 
+      <div className="ur-programme-choice-actions">
+        <div className="ur-programme-choice-title">
+          <span>ADD TO YOUR 3 UR CHOICES</span>
+          {selectedInAnotherChoice && (
+            <strong>✓ Selected</strong>
+          )}
+        </div>
+
+        {selectedInAnotherChoice ? (
+          <div className="ur-programme-selected-message">
+            {selectedPreference === 1
+              ? "🥇 First preference"
+              : selectedPreference === 2
+                ? "🥈 Second preference"
+                : "🥉 Third preference"}
+
+            <button
+              type="button"
+              onClick={() =>
+                onChooseUR?.(selectedPreference as URPreference)
+              }
+            >
+              KEEP THIS CHOICE
+            </button>
+          </div>
+        ) : (
+          <div className="ur-choice-button-grid">
+            {([1, 2, 3] as URPreference[]).map(
+              (preference) => {
+                const alreadyFilled =
+                  Boolean(
+                    selectedURChoices[
+                      preference - 1
+                    ],
+                  );
+
+                return (
+                  <button
+                    key={preference}
+                    type="button"
+                    className={`ur-add-choice-button choice-${preference}`}
+                    disabled={alreadyFilled}
+                    onClick={() =>
+                      onChooseUR?.(preference)
+                    }
+                  >
+                    {preference === 1
+                      ? "🥇 CHOICE 1"
+                      : preference === 2
+                        ? "🥈 CHOICE 2"
+                        : "🥉 CHOICE 3"}
+                  </button>
+                );
+              },
+            )}
+          </div>
+        )}
+
+        {!selectedInAnotherChoice &&
+          availablePreferences.length === 0 && (
+            <small className="ur-three-choice-full">
+              All 3 choices are already selected. Change one
+              above to select this programme.
+            </small>
+          )}
+      </div>
+
       <a
         href={programme.sourceUrl}
         target="_blank"
@@ -1778,7 +2199,7 @@ function InstitutionEmpty({
   institution: Institution;
   sourceUrl: string;
 }) {
-  return (
+return (
     <div className="smart-institution-empty">
       <span>ℹ️</span>
       <div>

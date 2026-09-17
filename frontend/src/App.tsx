@@ -27,11 +27,68 @@ function App() {
   const [showApplicationSupport, setShowApplicationSupport] = useState(false);
   const [applicationSupportView, setApplicationSupportView] =
     useState<"form" | "tracking">("form");
+
+  const [importedURChoices, setImportedURChoices] = useState<
+    [string, string, string] | null
+  >(null);
   const [activeCategory, setActiveCategory] = useState<"All" | NewsCategory>("All");
   const [selectedPost, setSelectedPost] = useState<number | null>(null);
   const [showMemberRegistration, setShowMemberRegistration] =
     useState(false);
   const [memberCount, setMemberCount] = useState(0);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("applicationSupport") !== "1") {
+      return;
+    }
+
+    const institution =
+      sessionStorage.getItem("sde:open-application-support");
+
+    if (institution !== "UR") {
+      return;
+    }
+
+    const storedChoices = sessionStorage.getItem(
+      "sde:confirmed-ur-choices",
+    );
+
+    if (storedChoices) {
+      try {
+        const parsed = JSON.parse(storedChoices);
+
+        const names = [0, 1, 2].map((index) => {
+          const choice = parsed[index];
+
+          if (!choice) return "";
+
+          return choice.programmeCode
+            ? `${choice.programmeName || ""} (${choice.programmeCode})`
+            : choice.programmeName || "";
+        }) as [string, string, string];
+
+        if (names.some(Boolean)) {
+          setImportedURChoices(names);
+        }
+      } catch {
+        console.error("Could not restore confirmed UR choices.");
+      }
+    }
+
+    setApplicationSupportView("form");
+    setShowApplicationSupport(true);
+
+    window.history.replaceState(
+      {},
+      document.title,
+      window.location.pathname,
+    );
+
+    sessionStorage.removeItem("sde:open-application-support");
+    sessionStorage.removeItem("sde:confirmed-ur-choices");
+  }, []);
 
   useEffect(() => {
     function handleOpenRegistration() {
@@ -576,7 +633,100 @@ const selectedPostData = publishedPosts.find(
             </a>
           </div>
         </section>
-      </main>
+      
+
+      {/* =====================================================
+          SDE WRITING HELP — SMART HOMEPAGE CARD
+          ===================================================== */}
+      <section className="sde-writing-home-section" aria-labelledby="writing-help-home-title">
+        <div className="sde-writing-home-card">
+
+          <div className="sde-writing-home-copy">
+            <div className="sde-writing-home-badge">
+              <span className="sde-writing-badge-dot"></span>
+              SDE WRITING HELP
+            </div>
+
+            <h2 id="writing-help-home-title">
+              Need help with your <span>writing?</span>
+            </h2>
+
+            <p>
+              Get practical support with CVs, motivation letters,
+              scholarship essays, application letters, academic writing
+              and more.
+            </p>
+
+            <div className="sde-writing-home-mini-tags">
+              <span>CV</span>
+              <span>Motivation Letter</span>
+              <span>Scholarship Essay</span>
+              <span>Application Letter</span>
+            </div>
+
+            <a
+              href="/writing-help"
+              className="sde-writing-home-cta"
+            >
+              <span>GET WRITING HELP</span>
+              <strong>→</strong>
+            </a>
+
+            <div className="sde-writing-home-language">
+              English <span>•</span> Français
+            </div>
+          </div>
+
+          <div className="sde-writing-home-visual" aria-hidden="true">
+
+            <div className="sde-writing-paper">
+              <div className="sde-writing-paper-top">
+                <span className="sde-writing-paper-logo">SDE</span>
+                <span className="sde-writing-paper-check">✓</span>
+              </div>
+
+              <div className="sde-writing-paper-heading"></div>
+
+              <div className="sde-writing-line line-1"></div>
+              <div className="sde-writing-line line-2"></div>
+              <div className="sde-writing-line line-3"></div>
+              <div className="sde-writing-line line-4"></div>
+
+              <div className="sde-writing-paper-highlight"></div>
+
+              <div className="sde-writing-signature">
+                <span></span>
+                <small>Ready to submit</small>
+              </div>
+            </div>
+
+            <div className="sde-writing-pen">
+              <div className="sde-pen-tip"></div>
+              <div className="sde-pen-body"></div>
+              <div className="sde-pen-grip"></div>
+              <div className="sde-pen-cap"></div>
+            </div>
+
+            <div className="sde-writing-floating-chip chip-cv">
+              <span>✓</span> CV
+            </div>
+
+            <div className="sde-writing-floating-chip chip-essay">
+              <span>✎</span> Essay
+            </div>
+
+            <div className="sde-writing-floating-chip chip-letter">
+              <span>✉</span> Letter
+            </div>
+
+            <div className="sde-writing-orbit orbit-one"></div>
+            <div className="sde-writing-orbit orbit-two"></div>
+
+          </div>
+        </div>
+      </section>
+
+</main>
 
       <footer className="site-footer">
         <div className="container footer-content">
@@ -718,9 +868,15 @@ const selectedPostData = publishedPosts.find(
         />
       )}
 
+      {/*
+        * Opportunity Finder → Application Support bridge.
+        * The planner dispatches the confirmed three UR choices.
+        */}
+
       {showApplicationSupport && (
         <ApplicationSupport
           initialView={applicationSupportView}
+          initialURChoices={importedURChoices}
           onClose={() => {
             setShowApplicationSupport(false);
           }}
