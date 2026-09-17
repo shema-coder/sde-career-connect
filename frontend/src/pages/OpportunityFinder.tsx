@@ -1562,9 +1562,7 @@ export default function OpportunityFinder() {
 
               <div className="smart-register-actions">
                 <a
-                  href={whatsappUrl}
-                  target="_blank"
-                  rel="noreferrer"
+                  href="/?register=1"
                   className="smart-register-button"
                 >
                   REGISTER NOW →
