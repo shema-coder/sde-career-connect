@@ -72,6 +72,8 @@ def public_application_response(
 ) -> ApplicationResponse:
     return ApplicationResponse(
         reference_code=application.reference_code,
+        request_type=application.request_type,
+        service_type=application.service_type,
         institution=application.institution,
         status=application.status,
         public_message=application.public_message,
@@ -348,6 +350,99 @@ def create_application(
             detail="Consent is required before submitting.",
         )
 
+    request_type = payload.request_type.strip().upper()
+
+    allowed_request_types = {
+        "UNIVERSITY_APPLICATION",
+        "WRITING_HELP",
+    }
+
+    if request_type not in allowed_request_types:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid request type.",
+        )
+
+    # ========================================================
+    # WRITING HELP
+    # ========================================================
+    if request_type == "WRITING_HELP":
+        if not payload.service_type or not payload.service_type.strip():
+            raise HTTPException(
+                status_code=400,
+                detail="Please select the type of writing help you need.",
+            )
+
+        if not payload.writing_answers or not payload.writing_answers.strip():
+            raise HTTPException(
+                status_code=400,
+                detail="Please complete the writing help questions before submitting.",
+            )
+
+        if not payload.full_names.strip():
+            raise HTTPException(
+                status_code=400,
+                detail="Full name is required.",
+            )
+
+        if not payload.email.strip() and not payload.phone.strip():
+            raise HTTPException(
+                status_code=400,
+                detail="Please provide an email address or phone number.",
+            )
+
+    # ========================================================
+    # UNIVERSITY APPLICATION
+    # ========================================================
+    if request_type == "UNIVERSITY_APPLICATION":
+        if not payload.institution.strip():
+            raise HTTPException(
+                status_code=400,
+                detail="Please select an institution.",
+            )
+
+        if not payload.faculty1.strip():
+            raise HTTPException(
+                status_code=400,
+                detail="First choice is required.",
+            )
+
+        # Preserve the existing university application requirements.
+        required_fields = {
+            "gender": payload.gender,
+            "province": payload.province,
+            "district": payload.district,
+            "sector": payload.sector,
+            "cell": payload.cell,
+            "village": payload.village,
+            "index_number": payload.index_number,
+            "national_id": payload.national_id,
+            "email": payload.email,
+            "phone": payload.phone,
+            "date_of_birth": payload.date_of_birth,
+            "trade_option": payload.trade_option,
+            "disability": payload.disability,
+            "refugee": payload.refugee,
+        }
+
+        missing_fields = [
+            field_name
+            for field_name, value in required_fields.items()
+            if not value or not value.strip()
+        ]
+
+        if missing_fields:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Please complete all required university application fields: "
+                    + ", ".join(missing_fields)
+                ),
+            )
+
+    # ========================================================
+    # COMMON TRACKING
+    # ========================================================
     reference_code = create_reference_code()
 
     while db.query(StudentApplication).filter(
@@ -357,8 +452,52 @@ def create_application(
 
     tracking_pin = create_tracking_pin()
 
+    application_data = payload.model_dump(
+        exclude={"consent"},
+    )
+
+    application_data["request_type"] = request_type
+
+    if application_data.get("service_type"):
+        application_data["service_type"] = (
+            application_data["service_type"].strip()
+        )
+
+    if application_data.get("writing_answers"):
+        application_data["writing_answers"] = (
+            application_data["writing_answers"].strip()
+        )
+
+    # The existing student_applications table contains university
+    # columns that are NOT NULL. Writing Help does not need those
+    # fields, so keep them safely blank internally.
+    if request_type == "WRITING_HELP":
+        university_only_defaults = {
+            "institution": "",
+            "gender": "",
+            "province": "",
+            "district": "",
+            "sector": "",
+            "cell": "",
+            "village": "",
+            "index_number": "",
+            "national_id": "",
+            "date_of_birth": "",
+            "trade_option": "",
+            "disability": "",
+            "disability_details": "",
+            "refugee": "",
+            "faculty1": "",
+            "faculty2": "",
+            "faculty3": "",
+        }
+
+        for field_name, default_value in university_only_defaults.items():
+            application_data[field_name] = default_value
+
     application = StudentApplication(
-        **payload.model_dump(exclude={"consent"}),
+        **application_data,
+        consent=payload.consent,
         reference_code=reference_code,
         tracking_pin_hash=pwd_context.hash(tracking_pin),
         status="Submitted",
@@ -373,6 +512,8 @@ def create_application(
 
     return ApplicationCreatedResponse(
         reference_code=application.reference_code,
+        request_type=application.request_type,
+        service_type=application.service_type,
         institution=application.institution,
         status=application.status,
         public_message=application.public_message,
@@ -396,6 +537,29 @@ def get_admin_applications(
     )
 
     return applications
+
+
+@app.get(
+    "/admin/applications/{application_id}",
+    response_model=AdminApplicationResponse,
+)
+def get_admin_application(
+    application_id: int,
+    db: Session = Depends(get_db),
+):
+    application = (
+        db.query(StudentApplication)
+        .filter(StudentApplication.id == application_id)
+        .first()
+    )
+
+    if not application:
+        raise HTTPException(
+            status_code=404,
+            detail="Application not found.",
+        )
+
+    return application
 
 
 @app.patch(

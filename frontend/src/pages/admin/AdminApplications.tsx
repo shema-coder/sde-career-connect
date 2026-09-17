@@ -14,6 +14,9 @@ type ApplicationStatus =
 type AdminApplication = {
   id: number;
   reference_code: string;
+  request_type?: string;
+  service_type?: string | null;
+  writing_answers?: string | null;
   institution: string;
   full_names: string;
   gender: string;
@@ -92,11 +95,53 @@ function formatDate(value: string) {
   });
 }
 
+function requestTypeLabel(value?: string) {
+  if (value === "WRITING_HELP") return "Writing Help";
+  if (value === "UNIVERSITY_APPLICATION") {
+    return "University Application";
+  }
+  return value || "Application Support";
+}
+
+function safeWritingAnswers(value?: string | null) {
+  if (!value) return null;
+
+  try {
+    const parsed = JSON.parse(value);
+
+    if (!parsed || typeof parsed !== "object") {
+      return null;
+    }
+
+    return parsed as {
+      language?: string;
+      service_name?: string;
+      answers?: Record<string, unknown>;
+    };
+  } catch {
+    return null;
+  }
+}
+
+function displayValue(value: unknown) {
+  if (value === null || value === undefined || value === "") {
+    return "Not provided";
+  }
+
+  if (typeof value === "boolean") {
+    return value ? "Yes" : "No";
+  }
+
+  return String(value);
+}
+
 export default function AdminApplications() {
   const navigate = useNavigate();
 
   const [applications, setApplications] = useState<AdminApplication[]>([]);
   const [selected, setSelected] = useState<AdminApplication | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState("");
   const [search, setSearch] = useState("");
   const [institution, setInstitution] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -158,10 +203,49 @@ export default function AdminApplications() {
     void loadApplications();
   }, [navigate]);
 
+  async function openApplication(application: AdminApplication) {
+    setSelected(application);
+    setDetailError("");
+    setDetailLoading(true);
+
+    try {
+      const response = await fetch(
+        `${API_URL}/admin/applications/${application.id}`,
+        {
+          headers: {
+            Accept: "application/json",
+          },
+        },
+      );
+
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(
+          typeof result?.detail === "string"
+            ? result.detail
+            : "Unable to load this application record.",
+        );
+      }
+
+      setSelected(result);
+    } catch (err) {
+      console.error("Unable to load application detail:", err);
+      setDetailError(
+        err instanceof Error
+          ? err.message
+          : "Unable to load this application record.",
+      );
+    } finally {
+      setDetailLoading(false);
+    }
+  }
+
   useEffect(() => {
     if (!selected) return;
 
     setEditingStatus(
+
       statuses.includes(selected.status as ApplicationStatus)
         ? (selected.status as ApplicationStatus)
         : "Received",
@@ -519,7 +603,7 @@ export default function AdminApplications() {
                         }`}
                         key={application.id}
                         onClick={() =>
-                          setSelected(application)
+                          void openApplication(application)
                         }
                       >
                         <div className="record-student">
@@ -641,6 +725,343 @@ export default function AdminApplications() {
                 </div>
 
                 <div className="application-detail-scroll">
+                  {detailLoading && (
+                    <div className="application-detail-loading">
+                      <div className="applications-loader" />
+                      <strong>Opening application record...</strong>
+                      <span>
+                        Loading the complete student submission.
+                      </span>
+                    </div>
+                  )}
+
+                  {detailError && (
+                    <div className="application-detail-error">
+                      <strong>Could not load the full record</strong>
+                      <span>{detailError}</span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          void openApplication(selected)
+                        }
+                      >
+                        Try again
+                      </button>
+                    </div>
+                  )}
+
+                  {!detailLoading && !detailError && (
+                    <>
+                      <section className="application-request-card">
+                        <div className="application-request-icon">
+                          {selected.request_type === "WRITING_HELP"
+                            ? "✍"
+                            : "🎓"}
+                        </div>
+
+                        <div className="application-request-content">
+                          <span>REQUEST TYPE</span>
+                          <strong>
+                            {requestTypeLabel(
+                              selected.request_type,
+                            )}
+                          </strong>
+
+                          {selected.request_type === "WRITING_HELP" && (
+                            <small>
+                              {selected.service_type ||
+                                "Writing support request"}
+                            </small>
+                          )}
+                        </div>
+
+                        <span className="application-record-live">
+                          ACTIVE RECORD
+                        </span>
+                      </section>
+
+                      {selected.request_type === "WRITING_HELP" && (
+                        <section className="application-detail-section application-writing-section">
+                          <div className="application-section-heading">
+                            <div>
+                              <span className="applications-section-label">
+                                WRITING HELP REQUEST
+                              </span>
+                              <h3>Student submission</h3>
+                            </div>
+                            <span className="application-writing-badge">
+                              ✍ Writing
+                            </span>
+                          </div>
+
+                          <div className="application-info-grid application-writing-meta">
+                            <div>
+                              <span>Service</span>
+                              <strong>
+                                {displayValue(
+                                  selected.service_type,
+                                )}
+                              </strong>
+                            </div>
+
+                            {(() => {
+                              const writing = safeWritingAnswers(
+                                selected.writing_answers,
+                              );
+
+                              return (
+                                <>
+                                  <div>
+                                    <span>Language</span>
+                                    <strong>
+                                      {displayValue(
+                                        writing?.language,
+                                      ).toUpperCase()}
+                                    </strong>
+                                  </div>
+
+                                  <div className="application-writing-full">
+                                    <span>
+                                      Student's answers
+                                    </span>
+
+                                    {writing?.answers &&
+                                    Object.keys(writing.answers).length > 0 ? (
+                                      <div className="writing-answer-list">
+                                        {Object.entries(
+                                          writing.answers,
+                                        ).map(
+                                          ([key, value]) => (
+                                            <article
+                                              className="writing-answer-card"
+                                              key={key}
+                                            >
+                                              <span>
+                                                {key
+                                                  .replace(
+                                                    /[_-]+/g,
+                                                    " ",
+                                                  )
+                                                  .replace(
+                                                    /\b\w/g,
+                                                    (letter) =>
+                                                      letter.toUpperCase(),
+                                                  )}
+                                              </span>
+                                              <p>
+                                                {displayValue(
+                                                  value,
+                                                )}
+                                              </p>
+                                            </article>
+                                          ),
+                                        )}
+                                      </div>
+                                    ) : (
+                                      <p className="application-empty-copy">
+                                        No detailed writing answers
+                                        were stored for this request.
+                                      </p>
+                                    )}
+                                  </div>
+                                </>
+                              );
+                            })()}
+                          </div>
+                        </section>
+                      )}
+
+                      <section className="application-detail-section">
+                        <div className="application-section-heading">
+                          <div>
+                            <span className="applications-section-label">
+                              STUDENT INFORMATION
+                            </span>
+                            <h3>Contact & identity</h3>
+                          </div>
+                        </div>
+
+                        <div className="application-info-grid">
+                          <div>
+                            <span>Full names</span>
+                            <strong>
+                              {displayValue(
+                                selected.full_names,
+                              )}
+                            </strong>
+                          </div>
+
+                          <div>
+                            <span>Email</span>
+                            <strong>
+                              {displayValue(selected.email)}
+                            </strong>
+                          </div>
+
+                          <div>
+                            <span>Phone</span>
+                            <strong>
+                              {displayValue(selected.phone)}
+                            </strong>
+                          </div>
+
+                          <div>
+                            <span>Gender</span>
+                            <strong>
+                              {displayValue(selected.gender)}
+                            </strong>
+                          </div>
+
+                          <div>
+                            <span>Date of birth</span>
+                            <strong>
+                              {displayValue(
+                                selected.date_of_birth,
+                              )}
+                            </strong>
+                          </div>
+
+                          <div>
+                            <span>National ID</span>
+                            <strong>
+                              {displayValue(
+                                selected.national_id,
+                              )}
+                            </strong>
+                          </div>
+
+                          <div>
+                            <span>Index number</span>
+                            <strong>
+                              {displayValue(
+                                selected.index_number,
+                              )}
+                            </strong>
+                          </div>
+
+                          <div>
+                            <span>Submitted</span>
+                            <strong>
+                              {formatDate(
+                                selected.created_at,
+                              )}
+                            </strong>
+                          </div>
+                        </div>
+                      </section>
+
+                      {selected.request_type !== "WRITING_HELP" && (
+                        <section className="application-detail-section">
+                          <div className="application-section-heading">
+                            <div>
+                              <span className="applications-section-label">
+                                UNIVERSITY APPLICATION
+                              </span>
+                              <h3>Academic choices</h3>
+                            </div>
+                          </div>
+
+                          <div className="application-info-grid">
+                            <div>
+                              <span>Institution</span>
+                              <strong>
+                                {displayValue(
+                                  institutionName(
+                                    selected.institution,
+                                  ),
+                                )}
+                              </strong>
+                            </div>
+
+                            <div>
+                              <span>Faculty / programme 1</span>
+                              <strong>
+                                {displayValue(
+                                  selected.faculty1,
+                                )}
+                              </strong>
+                            </div>
+
+                            <div>
+                              <span>Faculty / programme 2</span>
+                              <strong>
+                                {displayValue(
+                                  selected.faculty2,
+                                )}
+                              </strong>
+                            </div>
+
+                            <div>
+                              <span>Faculty / programme 3</span>
+                              <strong>
+                                {displayValue(
+                                  selected.faculty3,
+                                )}
+                              </strong>
+                            </div>
+
+                            <div>
+                              <span>Trade / option</span>
+                              <strong>
+                                {displayValue(
+                                  selected.trade_option,
+                                )}
+                              </strong>
+                            </div>
+
+                            <div>
+                              <span>Disability / support</span>
+                              <strong>
+                                {displayValue(
+                                  selected.disability,
+                                )}
+                              </strong>
+                            </div>
+                          </div>
+                        </section>
+                      )}
+
+                      <section className="application-detail-section">
+                        <div className="application-section-heading">
+                          <div>
+                            <span className="applications-section-label">
+                              LOCATION
+                            </span>
+                            <h3>Student location</h3>
+                          </div>
+                        </div>
+
+                        <div className="application-location-path">
+                          <span>
+                            {displayValue(
+                              selected.province,
+                            )}
+                          </span>
+                          <b>›</b>
+                          <span>
+                            {displayValue(
+                              selected.district,
+                            )}
+                          </span>
+                          <b>›</b>
+                          <span>
+                            {displayValue(selected.sector)}
+                          </span>
+                          <b>›</b>
+                          <span>
+                            {displayValue(selected.cell)}
+                          </span>
+                          <b>›</b>
+                          <span>
+                            {displayValue(
+                              selected.village,
+                            )}
+                          </span>
+                        </div>
+                      </section>
+                    </>
+                  )}
+
                   <section className="application-detail-section">
                     <span className="applications-section-label">
                       UPDATE STATUS
