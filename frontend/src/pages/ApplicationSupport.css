@@ -10542,3 +10542,248 @@ video {
     padding: 15px;
   }
 }
+
+
+/* =========================================================
+   SDE APPLICATION SUPPORT — QUICK UNIVERSITY ENTRY
+   Keeps the existing support content/form intact while making
+   university selection and START NOW much faster on mobile.
+   ========================================================= */
+
+.sde-university-entry,
+.application-support-university-entry,
+.institution-entry-card {
+  scroll-margin-top: 90px;
+}
+
+.sde-university-entry button,
+.application-support-university-entry button,
+.institution-entry-card button {
+  min-height: 48px;
+  touch-action: manipulation;
+}
+
+.application-support-start-now,
+.sde-start-now-button {
+  min-height: 50px;
+  border-radius: 14px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    filter 180ms ease;
+}
+
+.application-support-start-now:hover,
+.sde-start-now-button:hover {
+  transform: translateY(-2px);
+}
+
+.application-support-start-now:active,
+.sde-start-now-button:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 700px) {
+  .sde-university-entry,
+  .application-support-university-entry,
+  .institution-entry-card {
+    width: 100%;
+  }
+
+  .sde-university-entry button,
+  .application-support-university-entry button,
+  .institution-entry-card button {
+    width: 100%;
+    min-height: 52px;
+  }
+
+  .application-support-start-now,
+  .sde-start-now-button {
+    width: 100%;
+    min-height: 54px;
+    position: sticky;
+    bottom: 12px;
+    z-index: 20;
+  }
+}
+
+
+/* ============================================================
+   QUICK UNIVERSITY ENTRY — MOBILE + DESKTOP
+   ============================================================ */
+
+.smart-institution-card {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
+}
+
+.smart-institution-card:hover {
+  transform: translateY(-3px);
+}
+
+.smart-institution-card:active {
+  transform: translateY(-1px) scale(0.99);
+}
+
+.smart-institution-action {
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.smart-institution-card.is-selected .smart-institution-action {
+  font-weight: 900;
+}
+
+.mobile-institution-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 18px;
+  padding: 18px 20px;
+  border-radius: 18px;
+  border: 1px solid rgba(199, 212, 59, 0.35);
+  background: linear-gradient(
+    135deg,
+    rgba(7, 20, 38, 0.98),
+    rgba(14, 34, 55, 0.96)
+  );
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.16);
+  animation: sde-entry-slide-up 0.35s ease both;
+}
+
+.mobile-institution-entry-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mobile-entry-kicker {
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.72;
+}
+
+.mobile-institution-entry-copy strong {
+  font-size: 1rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.mobile-institution-entry-copy span:last-child {
+  font-size: 0.82rem;
+  line-height: 1.45;
+  opacity: 0.78;
+}
+
+.mobile-start-now-button {
+  flex: 0 0 auto;
+  min-height: 46px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 12px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.mobile-start-now-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 9px 22px rgba(0, 0, 0, 0.18);
+}
+
+.mobile-start-now-button:active {
+  transform: translateY(0) scale(0.98);
+}
+
+@keyframes sde-entry-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 700px) {
+  .institution-choice-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .smart-institution-card {
+    min-height: auto !important;
+    padding: 13px !important;
+    border-radius: 15px !important;
+  }
+
+  .smart-institution-content p {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+
+  .smart-institution-footer {
+    margin-top: 8px !important;
+  }
+
+  .mobile-institution-entry {
+    position: sticky;
+    bottom: 10px;
+    z-index: 20;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-top: 14px;
+    padding: 15px;
+    border-radius: 16px;
+    backdrop-filter: blur(14px);
+  }
+
+  .mobile-start-now-button {
+    width: 100%;
+    min-height: 50px;
+  }
+}
+
+@media (max-width: 420px) {
+  .institution-step-intro {
+    margin-bottom: 12px;
+  }
+
+  .smart-institution-card-top {
+    gap: 8px;
+  }
+
+  .smart-institution-content h3 {
+    font-size: 0.98rem;
+  }
+
+  .smart-institution-content p {
+    font-size: 0.78rem;
+  }
+
+  .smart-institution-footer {
+    font-size: 0.74rem;
+  }
+
+  .mobile-institution-entry-copy strong {
+    font-size: 0.95rem;
+  }
+}

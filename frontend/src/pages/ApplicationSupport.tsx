@@ -1395,10 +1395,10 @@ const ApplicationSupport: React.FC<ApplicationSupportProps> = ({
                       </div>
 
                       <div className="smart-institution-footer">
-                        <span>
+                        <span className="smart-institution-action">
                           {selected
-                            ? "Selected for your application"
-                            : "View admission guidance"}
+                            ? "ENTER UNIVERSITY"
+                            : "ENTER UNIVERSITY"}
                         </span>
 
                         <span
@@ -1412,6 +1412,42 @@ const ApplicationSupport: React.FC<ApplicationSupportProps> = ({
                   );
                 })}
               </div>
+
+              {data.institution &&
+                (() => {
+                  const selectedInstitutionInfo =
+                    institutionInfo[data.institution];
+
+                  if (!selectedInstitutionInfo) return null;
+
+                  return (
+                    <div className="mobile-institution-entry">
+                      <div className="mobile-institution-entry-copy">
+                        <span className="mobile-entry-kicker">
+                          UNIVERSITY SELECTED
+                        </span>
+                        <strong>
+                          {selectedInstitutionInfo.name}
+                        </strong>
+                        <span>
+                          Ready to review admission guidance and start your
+                          application support.
+                        </span>
+                      </div>
+
+                      <button
+                        type="button"
+                        className="mobile-start-now-button"
+                        onClick={() => {
+                          setActiveSupportPanel("eligibility");
+                          setErrors({});
+                        }}
+                      >
+                        START NOW <span aria-hidden="true">→</span>
+                      </button>
+                    </div>
+                  );
+                })()}
 
               {errors.institution && (
                 <p className="field-error institution-selection-error">
