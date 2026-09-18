@@ -61,3 +61,73 @@ def get_db():
         yield database
     finally:
         database.close()
+
+def ensure_student_application_schema():
+    """
+    Safely add columns introduced after the original
+    student_applications table was created.
+
+    This is intentionally idempotent so it can run on every
+    application startup without damaging existing data.
+    """
+    from sqlalchemy import inspect, text
+
+    table_name = "student_applications"
+
+    inspector = inspect(engine)
+
+    if table_name not in inspector.get_table_names():
+        return
+
+    existing_columns = {
+        column["name"]
+        for column in inspector.get_columns(table_name)
+    }
+
+    missing_columns = []
+
+    if "request_type" not in existing_columns:
+        missing_columns.append(
+            (
+                "request_type",
+                "VARCHAR(50) NOT NULL DEFAULT 'UNIVERSITY_APPLICATION'",
+            )
+        )
+
+    if "service_type" not in existing_columns:
+        missing_columns.append(
+            (
+                "service_type",
+                "VARCHAR(100)",
+            )
+        )
+
+    if "writing_answers" not in existing_columns:
+        missing_columns.append(
+            (
+                "writing_answers",
+                "TEXT",
+            )
+        )
+
+    if not missing_columns:
+        return
+
+    with engine.begin() as connection:
+        for column_name, column_definition in missing_columns:
+            connection.execute(
+                text(
+                    f'ALTER TABLE "{table_name}" '
+                    f'ADD COLUMN "{column_name}" {column_definition}'
+                )
+            )
+
+        if "request_type" not in existing_columns:
+            connection.execute(
+                text(
+                    'CREATE INDEX IF NOT EXISTS '
+                    '"ix_student_applications_request_type" '
+                    'ON "student_applications" ("request_type")'
+                )
+            )
+

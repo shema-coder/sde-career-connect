@@ -7,7 +7,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
-from .database import Base, engine, get_db
+from .database import (
+    Base,
+    engine,
+    get_db,
+    ensure_student_application_schema,
+)
 from .models import NewsPost, StudentApplication, Member
 from .schemas import (
     ApplicationCreate,
@@ -26,6 +31,7 @@ from .schemas import (
 
 
 Base.metadata.create_all(bind=engine)
+ensure_student_application_schema()
 
 app = FastAPI(
     title="SDE Career Connect API",
