@@ -270,6 +270,9 @@ type ApplicationSupportProps = {
   initialURChoices?: [string, string, string] | null;
 };
 
+const APPLICATION_API_URL =
+  import.meta.env.VITE_API_URL || "https://sde-career-connect.onrender.com";
+
 const ApplicationSupport: React.FC<ApplicationSupportProps> = ({
   onClose,
   initialView = "form",
@@ -613,8 +616,7 @@ const ApplicationSupport: React.FC<ApplicationSupportProps> = ({
       };
 
       const apiBaseUrl = (
-        import.meta.env.VITE_API_URL ||
-        "https://sde-career-connect.onrender.com"
+        APPLICATION_API_URL
       ).replace(/\/+$/, "");
 
       const response = await fetch(`${apiBaseUrl}/applications`, {
@@ -721,7 +723,7 @@ const ApplicationSupport: React.FC<ApplicationSupportProps> = ({
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/applications/track?reference_code=${encodeURIComponent(
+        `${APPLICATION_API_URL}/applications/track?reference_code=${encodeURIComponent(
           reference
         )}&tracking_pin=${encodeURIComponent(pin)}`,
         {
@@ -1001,27 +1003,18 @@ const ApplicationSupport: React.FC<ApplicationSupportProps> = ({
 
   if (submitted) {
     return (
-      <div className="application-shell">
-        <div className="application-success">
-          <div className="celebration-confetti" aria-hidden="true">
-            {Array.from({ length: 56 }).map((_, index) => (
-              <span
-                key={index}
-                className="confetti-piece"
-                style={{
-                  "--i": index,
-                  "--x": `${((index * 37) % 110) - 55}%`,
-                  "--r": `${(index * 47) % 360}deg`,
-                  "--d": `${(index % 9) * 0.35}s`,
-                } as React.CSSProperties}
-              />
-            ))}
-          </div>
+      <div className="application-success-screen">
+        {Array.from({ length: 24 }).map((_, index) => (
+          <span
+            key={index}
+            className="sde-confetti"
+            aria-hidden="true"
+          />
+        ))}
 
-          <div className="celebration-glow celebration-glow-one" />
-          <div className="celebration-glow celebration-glow-two" />
-
+        <div className="application-success-shell">
           <button
+            type="button"
             className="application-close success-close"
             onClick={onClose}
             aria-label="Close"
@@ -1029,120 +1022,134 @@ const ApplicationSupport: React.FC<ApplicationSupportProps> = ({
             ×
           </button>
 
-          <div className="success-content">
-
-            <div className="success-brand">
-              <div className="success-sde-logo">
-                <img
-                  src="/assets/sde-logo.png"
-                  alt="SDE Career Connect"
-                  onError={(event) => {
-                    event.currentTarget.style.display = "none";
-                    event.currentTarget.nextElementSibling?.classList.add(
-                      "is-visible"
-                    );
-                  }}
-                />
-                <span className="success-sde-fallback">SDE</span>
-              </div>
-              <span>SDE CAREER CONNECT</span>
-            </div>
-
-            <div className="success-hero-icon">
-              <div className="success-trophy">🏆</div>
-              <div className="success-checkmark">✓</div>
-            </div>
-
-            <span className="success-kicker">
-              REQUEST SUCCESSFULLY RECEIVED
-            </span>
-
-            <h1>Congratulations!</h1>
-
-            <p className="success-subtitle">
-              Your application support request is now with SDE Career Connect.
-            </p>
-
-            <p className="success-lead">
-              We have received your information and documents. Our team can now
-              review your request and guide you according to the requirements
-              of your selected institution.
-            </p>
-
-            <div className="success-reference-card">
-              <div className="success-reference-top">
-                <div>
-                  <span className="success-card-eyebrow">
-                    YOUR REFERENCE ID
-                  </span>
-                  <strong className="success-reference-id">
-                    {requestId}
-                  </strong>
+          <div className="application-success-card">
+            <div className="application-success-hero">
+              <div className="application-success-brand">
+                <div className="application-success-brand-mark">
+                  <img
+                    src="/assets/sde-logo.png"
+                    alt="SDE Career Connect"
+                    onError={(event) => {
+                      event.currentTarget.style.display = "none";
+                      const fallback = event.currentTarget
+                        .nextElementSibling as HTMLElement | null;
+                      fallback?.classList.add("is-visible");
+                    }}
+                  />
+                  <span>SDE</span>
                 </div>
 
-                <span className="success-reference-status">
-                  <i />
-                  RECEIVED
+                <div>
+                  <strong>SDE CAREER CONNECT</strong>
+                  <small>APPLICATION SUPPORT</small>
+                </div>
+              </div>
+
+              <div className="application-success-check-wrap">
+                <div className="application-success-check">
+                  ✓
+                </div>
+              </div>
+
+              <span className="application-success-section-kicker">
+                REQUEST SUCCESSFULLY RECEIVED
+              </span>
+
+              <h1 className="application-success-title">
+                Congratulations!
+              </h1>
+
+              <p className="application-success-subtitle">
+                Your application support request is now with SDE Career Connect.
+              </p>
+
+              <p className="application-success-body">
+                We have received your information and documents. Our team can
+                now review your request and guide you according to the
+                requirements of your selected institution.
+              </p>
+            </div>
+
+            <section className="application-success-section">
+              <div className="application-success-section-heading">
+                <span className="application-success-section-kicker">
+                  YOUR REQUEST
                 </span>
+                <h2>Your support details</h2>
+                <p>
+                  Save these details. You will need them whenever you want to
+                  track or discuss your application support request.
+                </p>
+              </div>
+
+              <div className="application-success-id-grid">
+                <div className="application-success-id-card application-success-reference">
+                  <div className="application-success-id-top">
+                    <span className="application-success-id-label">
+                      YOUR REFERENCE ID
+                    </span>
+                    <span className="application-success-id-status">
+                      <i />
+                      RECEIVED
+                    </span>
+                  </div>
+
+                  <strong className="application-success-id-value">
+                    {requestId}
+                  </strong>
+
+                  <button
+                    type="button"
+                    className="application-success-copy"
+                    onClick={() => {
+                      if (requestId && trackingPin) {
+                        navigator.clipboard?.writeText(
+                          `SDE Career Connect\nReference code: ${requestId}\nTracking PIN: ${trackingPin}`
+                        );
+                      }
+                    }}
+                  >
+                    <span>Copy reference & PIN</span>
+                    <span>⧉</span>
+                  </button>
+                </div>
+
+                <div className="application-success-id-card application-success-pin">
+                  <span className="application-success-id-label">
+                    PRIVATE TRACKING PIN
+                  </span>
+
+                  <strong className="application-success-id-value">
+                    {trackingPin}
+                  </strong>
+
+                  <p className="application-success-id-note">
+                    Keep this PIN private. You need it to track your
+                    application.
+                  </p>
+                </div>
               </div>
 
               <button
                 type="button"
-                className="copy-request"
+                className="application-success-primary"
                 onClick={() => {
-                  if (requestId && trackingPin) {
-                    navigator.clipboard?.writeText(
-                      `SDE Career Connect\nReference code: ${requestId}\nTracking PIN: ${trackingPin}`
-                    );
-                  }
+                  setTrackingReference(requestId);
+                  setTrackingPinInput(trackingPin);
+                  setTrackingError("");
+                  setTrackingResult(null);
+                  setTrackingView(true);
                 }}
               >
-                <span>Copy reference and PIN</span>
-                <span>⧉</span>
+                <span>✓</span>
+                <strong>Track My Application</strong>
+                <span>→</span>
               </button>
-            </div>
-
-            <div className="success-tracking-pin">
-              <span className="success-card-eyebrow">
-                PRIVATE TRACKING PIN
-              </span>
-
-              <strong>{trackingPin}</strong>
-
-              <p>
-                Keep this PIN private. You need it to track your application.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              className="tracking-submit success-track-button"
-              onClick={() => {
-                setTrackingReference(requestId);
-                setTrackingPinInput(trackingPin);
-                setTrackingError("");
-                setTrackingResult(null);
-                setTrackingView(true);
-              }}
-            >
-              <span>✓</span>
-              <span>Track My Application</span>
-            </button>
-
-            <div className="success-info-card success-icon-green">
-              <div className="success-info-icon">✓</div>
-              <div>
-                <strong>Support request received</strong>
-                <p>
-                  Keep your reference ID safe. Use it whenever you contact
-                  SDE Career Connect about this request.
-                </p>
-              </div>
-            </div>
+            </section>
 
             {selectedSupportInfo && (
-              <div className="success-institution-card">
-                <div className="success-institution-icon">
+              <section className="application-success-institution">
+                <div className="application-success-institution-logo">
                   {institutionLogo ? (
                     <img
                       src={institutionLogo}
@@ -1153,8 +1160,8 @@ const ApplicationSupport: React.FC<ApplicationSupportProps> = ({
                   )}
                 </div>
 
-                <div className="success-institution-copy">
-                  <span className="success-card-eyebrow">
+                <div>
+                  <span className="application-success-section-kicker">
                     SELECTED INSTITUTION
                   </span>
                   <h2>{selectedSupportInfo.name}</h2>
@@ -1164,79 +1171,91 @@ const ApplicationSupport: React.FC<ApplicationSupportProps> = ({
                     {selectedSupportInfo.shortName}.
                   </p>
                 </div>
-              </div>
+
+                <div className="application-success-institution-badge">
+                  ✓ Selected
+                </div>
+              </section>
             )}
 
-            <div className="success-section-card">
-              <div className="success-section-heading">
-                <div>
-                  <span className="success-card-eyebrow">
-                    WHAT HAPPENS NEXT
-                  </span>
-                  <h2>Your application support journey</h2>
-                  <p>
-                    We will help you move from preparation to the correct
-                    official application process.
-                  </p>
-                </div>
+            <section className="application-success-section">
+              <div className="application-success-section-heading">
+                <span className="application-success-section-kicker">
+                  WHAT HAPPENS NEXT
+                </span>
+                <h2>Your application support journey</h2>
+                <p>
+                  We will help you move from preparation to the correct
+                  official application process.
+                </p>
               </div>
 
-              <div className="success-steps-grid">
-                <div className="success-step-card">
-                  <span className="success-step-number">01</span>
-                  <div className="success-step-icon">✓</div>
+              <div className="application-success-journey">
+                <article className="application-success-step">
+                  <span className="application-success-step-number">
+                    01
+                  </span>
+                  <div className="application-success-step-icon">✓</div>
                   <h3>Information review</h3>
                   <p>
                     SDE reviews the information and documents you provided.
                   </p>
-                </div>
+                </article>
 
-                <div className="success-step-card">
-                  <span className="success-step-number">02</span>
-                  <div className="success-step-icon">◎</div>
+                <article className="application-success-step">
+                  <span className="application-success-step-number">
+                    02
+                  </span>
+                  <div className="application-success-step-icon">◎</div>
                   <h3>Institution guidance</h3>
                   <p>
-                    You receive guidance based on your selected university
+                    You receive guidance based on your selected institution
                     and programme choices.
                   </p>
-                </div>
+                </article>
 
-                <div className="success-step-card">
-                  <span className="success-step-number">03</span>
-                  <div className="success-step-icon">↗</div>
+                <article className="application-success-step">
+                  <span className="application-success-step-number">
+                    03
+                  </span>
+                  <div className="application-success-step-icon">↗</div>
                   <h3>Official application</h3>
                   <p>
                     We help you understand how to proceed through the
                     institution's official application channel.
                   </p>
-                </div>
+                </article>
               </div>
-            </div>
+            </section>
 
-            <div className="success-important-card">
-              <div className="success-icon-warning">!</div>
+            <div className="application-success-important">
+              <div className="application-success-important-icon">
+                !
+              </div>
 
               <div>
-                <span className="success-card-eyebrow">
+                <span className="application-success-section-kicker">
                   IMPORTANT
                 </span>
 
-                <h2>SDE Career Connect is not the official university portal</h2>
+                <h2>
+                  SDE Career Connect is not the official university portal
+                </h2>
 
                 <p>
-                  SDE Career Connect provides application guidance and support.
-                  We are not the official application portal of the selected
-                  university. Final admission decisions and official
+                  SDE Career Connect provides application guidance and
+                  support. We are not the official application portal of the
+                  selected university. Final admission decisions and official
                   applications are handled by the institution itself.
                 </p>
 
                 {selectedSupportInfo && (
-                  <div className="success-important-note">
+                  <div className="application-success-important-note">
                     <strong>
-                      Your selected institution: {selectedSupportInfo.name}
+                      Selected institution: {selectedSupportInfo.name}
                     </strong>
                     <span>
-                      Requirements can vary by programme, so always follow the
+                      Requirements can vary by programme. Always follow the
                       latest official institutional instructions.
                     </span>
                   </div>
@@ -1244,12 +1263,14 @@ const ApplicationSupport: React.FC<ApplicationSupportProps> = ({
               </div>
             </div>
 
-            <div className="success-support-card">
+            <section className="application-success-section application-success-support">
               <div>
-                <span className="success-card-eyebrow">
+                <span className="application-success-section-kicker">
                   NEED HELP?
                 </span>
+
                 <h2>Talk to SDE Support</h2>
+
                 <p>
                   Contact our team if you need help understanding your next
                   application step.
@@ -1257,7 +1278,8 @@ const ApplicationSupport: React.FC<ApplicationSupportProps> = ({
               </div>
 
               <button
-                className="success-support-button"
+                type="button"
+                className="application-success-secondary"
                 onClick={() => {
                   window.open(
                     "https://wa.me/250796371484?text=Hello%20SDE%20Career%20Connect%2C%20I%20have%20submitted%20an%20Application%20Support%20request.%20My%20request%20ID%20is%20" +
@@ -1269,19 +1291,22 @@ const ApplicationSupport: React.FC<ApplicationSupportProps> = ({
                 Talk to SDE Support
                 <span>↗</span>
               </button>
+            </section>
+
+            <div className="application-success-footer">
+              <button
+                type="button"
+                className="application-success-secondary"
+                onClick={onClose}
+              >
+                ← Back to SDE Career Connect
+              </button>
+
+              <p>
+                SDE Career Connect • Helping students make better education
+                and career decisions
+              </p>
             </div>
-
-            <button
-              className="success-back-button"
-              onClick={onClose}
-            >
-              ← Back to SDE Career Connect
-            </button>
-
-            <p className="success-footer-note">
-              SDE Career Connect • Helping students make better education and
-              career decisions
-            </p>
           </div>
         </div>
       </div>
