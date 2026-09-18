@@ -7,6 +7,9 @@ import App from "./App.tsx";
 
 const ArticlePage = lazy(() => import("./pages/ArticlePage.tsx"));
 const OpportunityFinder = lazy(() => import("./pages/OpportunityFinder.tsx"));
+const ApplicationSupport = lazy(
+  () => import("./pages/ApplicationSupport.tsx"),
+);
 const WritingHelp = lazy(() => import("./pages/WritingHelp.tsx"));
 const URApplicationSupport = lazy(
   () => import("./pages/URApplicationSupport.tsx"),
@@ -87,6 +90,17 @@ createRoot(document.getElementById("root")!).render(
           element={
             <LazyPage>
               <WritingHelp />
+            </LazyPage>
+          }
+        />
+
+        <Route
+          path="/application-support"
+          element={
+            <LazyPage>
+              <ApplicationSupport onClose={() => {
+                window.location.href = "/";
+              }} />
             </LazyPage>
           }
         />

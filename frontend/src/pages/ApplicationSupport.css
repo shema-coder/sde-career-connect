@@ -10787,3 +10787,404 @@ video {
     font-size: 0.95rem;
   }
 }
+
+
+/* ============================================================
+   SDE APPLICATION SUPPORT — PUBLIC SHAREABLE PAGE
+   Keeps the existing modal styles intact while giving
+   /application-support a real mobile-first page experience.
+   ============================================================ */
+
+body.application-support-standalone {
+  background: #f5f8fc;
+  overflow-x: hidden;
+}
+
+.application-shell--standalone {
+  position: relative !important;
+  inset: auto !important;
+  width: 100% !important;
+  min-height: 100dvh;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  background: #f5f8fc !important;
+  display: block !important;
+}
+
+.application-shell--standalone .application-close {
+  display: none;
+}
+
+.application-public-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+  background: rgba(10, 35, 66, 0.97);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.application-public-header-inner {
+  width: min(1180px, calc(100% - 32px));
+  min-height: 72px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.application-public-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+  color: #fff;
+  text-decoration: none;
+}
+
+.application-public-brand img {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
+.application-public-brand span {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.application-public-brand strong {
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.application-public-brand small {
+  margin-top: 3px;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+
+.application-public-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.application-public-track,
+.application-public-home {
+  min-height: 42px;
+  padding: 9px 14px;
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 800;
+  font-size: 0.78rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.application-public-track {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.application-public-home {
+  border: 1px solid #d7df72;
+  color: #0a2342;
+  background: #d7df72;
+}
+
+.application-public-track:hover,
+.application-public-home:hover {
+  transform: translateY(-1px);
+}
+
+.application-public-intro {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 85% 20%, rgba(215, 223, 114, 0.18), transparent 28%),
+    linear-gradient(135deg, #0a2342 0%, #102f55 55%, #071a30 100%);
+  color: #fff;
+}
+
+.application-public-intro::after {
+  content: "";
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  right: -110px;
+  bottom: -160px;
+  border-radius: 50%;
+  border: 1px solid rgba(215, 223, 114, 0.18);
+  pointer-events: none;
+}
+
+.application-public-intro-inner {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 52px 0 42px;
+}
+
+.application-public-kicker {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 6px 10px;
+  border: 1px solid rgba(215, 223, 114, 0.35);
+  border-radius: 999px;
+  color: #e8eb9b;
+  background: rgba(215, 223, 114, 0.08);
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.application-public-intro h1 {
+  max-width: 780px;
+  margin: 14px 0 12px;
+  font-size: clamp(2rem, 5vw, 4rem);
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+}
+
+.application-public-intro p {
+  max-width: 720px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: clamp(0.95rem, 1.8vw, 1.12rem);
+  line-height: 1.65;
+}
+
+.application-public-points {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 24px;
+}
+
+.application-public-points span {
+  padding: 8px 11px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.application-public-content {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 28px 0 0;
+}
+
+.application-public-content > .application-content,
+.application-public-content > form,
+.application-public-content > section {
+  width: 100%;
+}
+
+.application-public-footer {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 28px 0 40px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: #66758a;
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+@media (max-width: 700px) {
+  .application-public-header-inner {
+    width: calc(100% - 20px);
+    min-height: 64px;
+    gap: 8px;
+  }
+
+  .application-public-brand img {
+    width: 36px;
+    height: 36px;
+  }
+
+  .application-public-brand strong {
+    font-size: 0.82rem;
+  }
+
+  .application-public-brand small {
+    font-size: 0.62rem;
+  }
+
+  .application-public-actions {
+    gap: 5px;
+  }
+
+  .application-public-track,
+  .application-public-home {
+    min-height: 38px;
+    padding: 8px 10px;
+    border-radius: 9px;
+    font-size: 0.68rem;
+  }
+
+  .application-public-home {
+    display: none;
+  }
+
+  .application-public-intro-inner {
+    width: calc(100% - 24px);
+    padding: 34px 0 30px;
+  }
+
+  .application-public-intro h1 {
+    font-size: clamp(2rem, 11vw, 3rem);
+    line-height: 1;
+    margin-top: 12px;
+  }
+
+  .application-public-intro p {
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+
+  .application-public-points {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 7px;
+    margin-top: 18px;
+  }
+
+  .application-public-points span {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .application-public-content {
+    width: calc(100% - 20px);
+    padding-top: 16px;
+  }
+
+  .application-public-footer {
+    width: calc(100% - 24px);
+    padding-bottom: max(28px, env(safe-area-inset-bottom));
+    font-size: 0.68rem;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .application-public-intro-inner {
+    animation: application-public-intro-in 0.55s ease both;
+  }
+
+  @keyframes application-public-intro-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* =========================================================
+   SUBMISSION ERROR BANNER
+   ========================================================= */
+
+.submit-error-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin: 20px 0;
+  padding: 16px 18px;
+  border: 1px solid rgba(185, 28, 28, 0.2);
+  border-radius: 16px;
+  background: #fff7f7;
+  color: #7f1d1d;
+  animation: submitErrorIn 0.28s ease both;
+}
+
+.submit-error-icon {
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #b91c1c;
+  color: #fff;
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.submit-error-content {
+  min-width: 0;
+}
+
+.submit-error-banner strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.submit-error-banner p {
+  margin: 0;
+  line-height: 1.55;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.submit-error-banner small {
+  display: block;
+  margin-top: 6px;
+  color: #991b1b;
+  font-size: 12px;
+}
+
+@keyframes submitErrorIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 600px) {
+  .submit-error-banner {
+    padding: 14px;
+    gap: 11px;
+  }
+
+  .submit-error-icon {
+    flex-basis: 30px;
+    width: 30px;
+    height: 30px;
+    font-size: 15px;
+  }
+
+  .submit-error-banner p {
+    font-size: 13px;
+  }
+}

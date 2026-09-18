@@ -235,17 +235,12 @@ const selectedPostData = publishedPosts.find(
             >
               Find My Opportunities
             </Link>
-            <a
-              href="#support"
-              onClick={(event) => {
-                event.preventDefault();
-                setMenuOpen(false);
-                setApplicationSupportView("form");
-                setShowApplicationSupport(true);
-              }}
+            <Link
+              to="/application-support"
+              onClick={() => setMenuOpen(false)}
             >
               Application Support
-            </a>
+            </Link>
             <a href="#about" onClick={() => setMenuOpen(false)}>
               About Us
             </a>

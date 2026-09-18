@@ -612,7 +612,12 @@ const ApplicationSupport: React.FC<ApplicationSupportProps> = ({
         consent: data.consent,
       };
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/applications`, {
+      const apiBaseUrl = (
+        import.meta.env.VITE_API_URL ||
+        "https://sde-career-connect.onrender.com"
+      ).replace(/\/+$/, "");
+
+      const response = await fetch(`${apiBaseUrl}/applications`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -622,7 +627,13 @@ const ApplicationSupport: React.FC<ApplicationSupportProps> = ({
       });
 
       let result: {
-        detail?: string;
+        detail?:
+          | string
+          | Array<{
+              type?: string;
+              loc?: Array<string | number>;
+              msg?: string;
+            }>;
         reference_code?: string;
         tracking_pin?: string;
       } = {};
@@ -634,9 +645,27 @@ const ApplicationSupport: React.FC<ApplicationSupportProps> = ({
       }
 
       if (!response.ok) {
-        throw new Error(
-          result.detail || `Application submission failed (${response.status}).`
-        );
+        let message = `Application submission failed (${response.status}).`;
+
+        if (typeof result.detail === "string") {
+          message = result.detail;
+        } else if (Array.isArray(result.detail)) {
+          message = result.detail
+            .map((item) => {
+              const location = item.loc?.filter(
+                (part) => part !== "body",
+              );
+
+              const field = location?.length
+                ? String(location[location.length - 1]).replace(/_/g, " ")
+                : "application";
+
+              return `${field}: ${item.msg || "Invalid value"}`;
+            })
+            .join(" • ");
+        }
+
+        throw new Error(message);
       }
 
       if (!result.reference_code || !result.tracking_pin) {
@@ -1357,6 +1386,7 @@ const ApplicationSupport: React.FC<ApplicationSupportProps> = ({
                         update("institution", key);
                         setActiveSupportPanel("eligibility");
                         setErrors({});
+                        setStep(2);
                       }}
                       aria-pressed={selected}
                     >
@@ -1441,6 +1471,7 @@ const ApplicationSupport: React.FC<ApplicationSupportProps> = ({
                         onClick={() => {
                           setActiveSupportPanel("eligibility");
                           setErrors({});
+                          setStep(2);
                         }}
                       >
                         START NOW <span aria-hidden="true">→</span>
@@ -1455,7 +1486,66 @@ const ApplicationSupport: React.FC<ApplicationSupportProps> = ({
                 </p>
               )}
 
-              {selectedSupportInfo && (
+<div
+                className={`smart-next-card ${
+                  data.institution ? "ready" : "not-ready"
+                }`}
+              >
+                <div className="smart-next-selection">
+
+                  <div className="smart-next-check">
+                    {data.institution ? "✓" : "1"}
+                  </div>
+
+                  <div>
+                    <span className="smart-next-eyebrow">
+                      {data.institution
+                        ? "YOUR SELECTION"
+                        : "NEXT STEP"}
+                    </span>
+
+                    <h3>
+                      {data.institution
+                        ? selectedSupportInfo?.name
+                        : "Choose an institution first"}
+                    </h3>
+
+                    <p>
+                      {data.institution
+                        ? `You selected ${selectedSupportInfo?.shortName}. Your application will be prepared for this institution.`
+                        : "Select UR, RP or ALU above to continue with your application."}
+                    </p>
+                  </div>
+
+                </div>
+
+                <button
+                  type="button"
+                  className="smart-next-button"
+                  onClick={() => {
+                    if (!data.institution) {
+                      setErrors({
+                        institution: "Please select an institution to continue.",
+                      });
+                      return;
+                    }
+
+                    setErrors({});
+                    setStep(2);
+                  }}
+                  disabled={!data.institution}
+                >
+                  <span>Continue to personal information</span>
+                  <span className="smart-next-arrow" aria-hidden="true">
+                    →
+                  </span>
+                </button>
+              </div>
+
+            </section>
+          )}
+
+              {step === 2 && selectedSupportInfo && (
                 <section className="smart-admission-dashboard">
 
                   <div className="smart-dashboard-header">
@@ -1999,65 +2089,6 @@ const ApplicationSupport: React.FC<ApplicationSupportProps> = ({
 
                 </section>
               )}
-
-              <div
-                className={`smart-next-card ${
-                  data.institution ? "ready" : "not-ready"
-                }`}
-              >
-                <div className="smart-next-selection">
-
-                  <div className="smart-next-check">
-                    {data.institution ? "✓" : "1"}
-                  </div>
-
-                  <div>
-                    <span className="smart-next-eyebrow">
-                      {data.institution
-                        ? "YOUR SELECTION"
-                        : "NEXT STEP"}
-                    </span>
-
-                    <h3>
-                      {data.institution
-                        ? selectedSupportInfo?.name
-                        : "Choose an institution first"}
-                    </h3>
-
-                    <p>
-                      {data.institution
-                        ? `You selected ${selectedSupportInfo?.shortName}. Your application will be prepared for this institution.`
-                        : "Select UR, RP or ALU above to continue with your application."}
-                    </p>
-                  </div>
-
-                </div>
-
-                <button
-                  type="button"
-                  className="smart-next-button"
-                  onClick={() => {
-                    if (!data.institution) {
-                      setErrors({
-                        institution: "Please select an institution to continue.",
-                      });
-                      return;
-                    }
-
-                    setErrors({});
-                    setStep(2);
-                  }}
-                  disabled={!data.institution}
-                >
-                  <span>Continue to personal information</span>
-                  <span className="smart-next-arrow" aria-hidden="true">
-                    →
-                  </span>
-                </button>
-              </div>
-
-            </section>
-          )}
 
           {step === 2 && (
             <section className="form-step">
@@ -2677,6 +2708,22 @@ const ApplicationSupport: React.FC<ApplicationSupportProps> = ({
               </p>
             </div>
           </div>
+
+          {errors.submit && (
+            <div className="submit-error-banner" role="alert">
+              <span className="submit-error-icon" aria-hidden="true">
+                !
+              </span>
+
+              <div className="submit-error-content">
+                <strong>We couldn't submit your request</strong>
+                <p>{errors.submit}</p>
+                <small>
+                  Please check the information above and try again.
+                </small>
+              </div>
+            </div>
+          )}
 
           <label className="consent-box">
                 <input
