@@ -11188,3 +11188,601 @@ body.application-support-standalone {
     font-size: 13px;
   }
 }
+
+/* ============================================================
+   SDE APPLICATION SUCCESS — PREMIUM CELEBRATION UI
+   ============================================================ */
+
+.application-success-screen {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  overflow: hidden;
+  padding: 42px 20px 70px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(190, 174, 70, 0.18), transparent 34%),
+    radial-gradient(circle at 10% 30%, rgba(255,255,255,0.06), transparent 28%),
+    linear-gradient(145deg, #06142f 0%, #081b3d 48%, #030b1d 100%);
+  color: #fff;
+}
+
+.application-success-screen::before,
+.application-success-screen::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(4px);
+}
+
+.application-success-screen::before {
+  width: 420px;
+  height: 420px;
+  top: -180px;
+  left: -150px;
+  background: rgba(202, 190, 79, 0.14);
+  animation: sdeSuccessOrb 8s ease-in-out infinite;
+}
+
+.application-success-screen::after {
+  width: 360px;
+  height: 360px;
+  right: -130px;
+  bottom: 5%;
+  background: rgba(45, 105, 190, 0.13);
+  animation: sdeSuccessOrb 10s ease-in-out infinite reverse;
+}
+
+.application-success-shell {
+  width: min(1080px, 100%);
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.application-success-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 32px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.095), rgba(255,255,255,0.035)),
+    rgba(4, 14, 34, 0.92);
+  box-shadow:
+    0 40px 100px rgba(0,0,0,0.38),
+    0 0 70px rgba(190,174,70,0.07);
+  backdrop-filter: blur(24px);
+  animation: sdeSuccessCardIn 0.75s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.application-success-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(120deg, transparent 20%, rgba(255,255,255,0.06) 50%, transparent 80%);
+  transform: translateX(-120%);
+  animation: sdeSuccessShine 5s ease-in-out 1.2s infinite;
+}
+
+.application-success-hero {
+  position: relative;
+  text-align: center;
+  padding: 52px 28px 38px;
+  border-bottom: 1px solid rgba(255,255,255,0.09);
+}
+
+.application-success-brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.72);
+}
+
+.application-success-brand::before {
+  content: "SDE";
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: #fff;
+  color: #071631;
+  font-size: 0.72rem;
+  letter-spacing: 0;
+  box-shadow: 0 0 28px rgba(255,255,255,0.16);
+  animation: sdeLogoPulse 2.6s ease-in-out infinite;
+}
+
+.application-success-check-wrap {
+  position: relative;
+  width: 112px;
+  height: 112px;
+  margin: 0 auto 26px;
+}
+
+.application-success-check-wrap::before,
+.application-success-check-wrap::after {
+  content: "";
+  position: absolute;
+  inset: -14px;
+  border-radius: 50%;
+  border: 1px solid rgba(213,201,91,0.28);
+  animation: sdeSuccessRing 2.5s ease-out infinite;
+}
+
+.application-success-check-wrap::after {
+  inset: -28px;
+  opacity: 0.5;
+  animation-delay: 0.65s;
+}
+
+.application-success-check {
+  position: relative;
+  width: 112px;
+  height: 112px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #fff 0%, #f6f0b5 100%);
+  color: #10244c;
+  font-size: 3.6rem;
+  font-weight: 1000;
+  box-shadow:
+    0 0 0 8px rgba(215,203,91,0.10),
+    0 0 55px rgba(215,203,91,0.34);
+  animation: sdeCheckPop 0.75s cubic-bezier(.17,.89,.32,1.3) 0.2s both;
+}
+
+.application-success-check span {
+  display: block;
+  animation: sdeCheckDraw 0.65s ease-out 0.65s both;
+}
+
+.application-success-title {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 0.98;
+  font-weight: 1000;
+  letter-spacing: -0.045em;
+}
+
+.application-success-title span {
+  display: block;
+  margin-top: 10px;
+  color: #d9cd5e;
+}
+
+.application-success-subtitle {
+  max-width: 700px;
+  margin: 18px auto 0;
+  color: rgba(255,255,255,0.72);
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.application-success-body {
+  padding: 32px;
+}
+
+.application-success-id-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+.application-success-id-card {
+  position: relative;
+  overflow: hidden;
+  padding: 22px;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 20px;
+  background: rgba(255,255,255,0.045);
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.application-success-id-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(218,204,88,0.4);
+  box-shadow: 0 18px 38px rgba(0,0,0,0.22);
+}
+
+.application-success-id-card::after {
+  content: "";
+  position: absolute;
+  width: 90px;
+  height: 90px;
+  right: -45px;
+  top: -45px;
+  border-radius: 50%;
+  background: rgba(218,204,88,0.10);
+}
+
+.application-success-id-label {
+  display: block;
+  margin-bottom: 9px;
+  color: rgba(255,255,255,0.54);
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.application-success-id-value {
+  display: block;
+  color: #fff;
+  font-size: clamp(1.05rem, 2.4vw, 1.45rem);
+  font-weight: 1000;
+  letter-spacing: 0.025em;
+  word-break: break-word;
+}
+
+.application-success-id-note {
+  display: block;
+  margin-top: 8px;
+  color: #d9cd5e;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.application-success-section {
+  margin-top: 28px;
+  padding: 28px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 24px;
+  background: rgba(255,255,255,0.035);
+}
+
+.application-success-section-kicker {
+  margin-bottom: 7px;
+  color: #d9cd5e;
+  font-size: 0.7rem;
+  font-weight: 1000;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.application-success-section h2 {
+  margin: 0 0 10px;
+  color: #fff;
+  font-size: clamp(1.35rem, 3vw, 2rem);
+  font-weight: 1000;
+  letter-spacing: -0.025em;
+}
+
+.application-success-section p {
+  margin: 0;
+  color: rgba(255,255,255,0.68);
+  line-height: 1.75;
+}
+
+.application-success-journey {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  margin-top: 26px;
+}
+
+.application-success-step {
+  position: relative;
+  padding: 20px 24px;
+}
+
+.application-success-step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 38px;
+  right: 0;
+  width: calc(100% - 70px);
+  height: 1px;
+  background: linear-gradient(90deg, rgba(218,204,88,0.55), rgba(255,255,255,0.08));
+}
+
+.application-success-step-number {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin-bottom: 15px;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #fff, #d9cd5e);
+  color: #071631;
+  font-size: 0.8rem;
+  font-weight: 1000;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+}
+
+.application-success-step:nth-child(1) .application-success-step-number {
+  animation: sdeStepFloat 3s ease-in-out infinite;
+}
+
+.application-success-step:nth-child(2) .application-success-step-number {
+  animation: sdeStepFloat 3s ease-in-out 0.4s infinite;
+}
+
+.application-success-step:nth-child(3) .application-success-step-number {
+  animation: sdeStepFloat 3s ease-in-out 0.8s infinite;
+}
+
+.application-success-step h3 {
+  margin: 0 0 7px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.application-success-step p {
+  font-size: 0.88rem;
+  line-height: 1.65;
+}
+
+.application-success-important {
+  border-left: 4px solid #d9cd5e;
+  background:
+    linear-gradient(90deg, rgba(218,204,88,0.09), rgba(255,255,255,0.025));
+}
+
+.application-success-important strong {
+  color: #fff;
+}
+
+.application-success-institution {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 20px;
+  padding: 18px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.045);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.application-success-institution img {
+  width: 62px;
+  height: 62px;
+  object-fit: contain;
+  border-radius: 14px;
+  background: #fff;
+  padding: 7px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+.application-success-institution-label {
+  display: block;
+  margin-bottom: 4px;
+  color: rgba(255,255,255,0.48);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.application-success-institution strong {
+  color: #fff;
+  font-size: 1.15rem;
+}
+
+.application-success-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.application-success-actions a,
+.application-success-actions button {
+  min-height: 52px;
+  border: 0;
+  border-radius: 15px;
+  padding: 0 22px;
+  font: inherit;
+  font-weight: 900;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.application-success-actions a:hover,
+.application-success-actions button:hover {
+  transform: translateY(-3px);
+}
+
+.application-success-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #fff, #d9cd5e);
+  color: #071631;
+  box-shadow: 0 12px 30px rgba(218,204,88,0.18);
+}
+
+.application-success-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.07);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+}
+
+.application-success-footer {
+  margin-top: 28px;
+  text-align: center;
+  color: rgba(255,255,255,0.42);
+  font-size: 0.78rem;
+}
+
+.sde-confetti {
+  position: absolute;
+  z-index: 1;
+  top: -20px;
+  width: 9px;
+  height: 18px;
+  border-radius: 3px;
+  pointer-events: none;
+  opacity: 0;
+  animation: sdeConfettiFall var(--fall-duration, 3.8s) linear var(--delay, 0s) infinite;
+}
+
+.sde-confetti:nth-child(1) { left: 7%; --rotation: 220deg; --drift: 90px; }
+.sde-confetti:nth-child(2) { left: 14%; --rotation: 130deg; --drift: -60px; animation-delay: .4s; }
+.sde-confetti:nth-child(3) { left: 23%; --rotation: 280deg; --drift: 110px; animation-delay: 1s; }
+.sde-confetti:nth-child(4) { left: 32%; --rotation: 170deg; --drift: -80px; animation-delay: .7s; }
+.sde-confetti:nth-child(5) { left: 43%; --rotation: 250deg; --drift: 75px; animation-delay: .2s; }
+.sde-confetti:nth-child(6) { left: 53%; --rotation: 145deg; --drift: -110px; animation-delay: 1.2s; }
+.sde-confetti:nth-child(7) { left: 64%; --rotation: 300deg; --drift: 95px; animation-delay: .55s; }
+.sde-confetti:nth-child(8) { left: 74%; --rotation: 190deg; --drift: -70px; animation-delay: 1.35s; }
+.sde-confetti:nth-child(9) { left: 83%; --rotation: 260deg; --drift: 80px; animation-delay: .85s; }
+.sde-confetti:nth-child(10) { left: 92%; --rotation: 120deg; --drift: -100px; animation-delay: .3s; }
+
+@keyframes sdeSuccessCardIn {
+  from { opacity: 0; transform: translateY(28px) scale(.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes sdeSuccessShine {
+  0%, 25% { transform: translateX(-120%); }
+  55%, 100% { transform: translateX(120%); }
+}
+
+@keyframes sdeCheckPop {
+  from { opacity: 0; transform: scale(.35) rotate(-18deg); }
+  to { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+@keyframes sdeCheckDraw {
+  from { opacity: 0; transform: scale(.5) rotate(-15deg); }
+  to { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+@keyframes sdeSuccessRing {
+  0% { opacity: .65; transform: scale(.75); }
+  80%, 100% { opacity: 0; transform: scale(1.2); }
+}
+
+@keyframes sdeSuccessOrb {
+  0%, 100% { transform: translate3d(0,0,0) scale(1); }
+  50% { transform: translate3d(35px,25px,0) scale(1.08); }
+}
+
+@keyframes sdeLogoPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 28px rgba(255,255,255,0.16); }
+  50% { transform: scale(1.06); box-shadow: 0 0 38px rgba(218,204,88,0.28); }
+}
+
+@keyframes sdeStepFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes sdeConfettiFall {
+  0% {
+    opacity: 0;
+    transform: translate3d(0,-30px,0) rotate(0deg);
+  }
+  8% { opacity: 1; }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--drift), 720px, 0) rotate(var(--rotation));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .application-success-screen *,
+  .application-success-screen::before,
+  .application-success-screen::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .sde-confetti {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .application-success-screen {
+    padding: 18px 12px 42px;
+  }
+
+  .application-success-card {
+    border-radius: 23px;
+  }
+
+  .application-success-hero {
+    padding: 38px 18px 30px;
+  }
+
+  .application-success-check-wrap,
+  .application-success-check {
+    width: 92px;
+    height: 92px;
+  }
+
+  .application-success-check {
+    font-size: 3rem;
+  }
+
+  .application-success-body {
+    padding: 18px;
+  }
+
+  .application-success-id-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .application-success-section {
+    padding: 20px;
+    border-radius: 19px;
+  }
+
+  .application-success-journey {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .application-success-step {
+    padding: 16px 0 16px 72px;
+  }
+
+  .application-success-step-number {
+    position: absolute;
+    left: 0;
+    top: 16px;
+    width: 48px;
+    height: 48px;
+  }
+
+  .application-success-step:not(:last-child)::after {
+    left: 24px;
+    top: 64px;
+    width: 1px;
+    height: calc(100% - 45px);
+    background: linear-gradient(180deg, rgba(218,204,88,0.5), rgba(255,255,255,0.05));
+  }
+
+  .application-success-institution {
+    align-items: flex-start;
+  }
+
+  .application-success-actions {
+    flex-direction: column;
+  }
+
+  .application-success-actions a,
+  .application-success-actions button {
+    width: 100%;
+  }
+}
