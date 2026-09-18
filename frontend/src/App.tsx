@@ -1,10 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import { lazy, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { apiRequest } from "./lib/api";
 import type { NewsCategory, NewsPost } from "./types/news";
 import "./App.css";
-import ApplicationSupport from "./pages/ApplicationSupport";
-import MemberRegistration from "./pages/MemberRegistration";
+const ApplicationSupport = lazy(
+  () => import("./pages/ApplicationSupport.tsx"),
+);
+const MemberRegistration = lazy(
+  () => import("./pages/MemberRegistration.tsx"),
+);
 
 const WHATSAPP_GROUP =
   "https://chat.whatsapp.com/KdxQwE1skoLIsmLC3i0HmK";
