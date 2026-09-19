@@ -1,9 +1,10 @@
-import { StrictMode, Suspense, lazy } from "react";
+import React, { StrictMode, Suspense, lazy } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 
 import "./index.css";
 import App from "./App.tsx";
+import { initAnalytics, trackPageView } from "./lib/analytics.ts";
 
 const ArticlePage = lazy(() => import("./pages/ArticlePage.tsx"));
 const OpportunityFinder = lazy(() => import("./pages/OpportunityFinder.tsx"));
@@ -22,6 +23,16 @@ const AdminApplications = lazy(
   () => import("./pages/admin/AdminApplications.tsx"),
 );
 const AdminMembers = lazy(() => import("./pages/admin/AdminMembers.tsx"));
+
+function AnalyticsTracker() {
+  const location = useLocation();
+
+  React.useEffect(() => {
+    trackPageView(location.pathname + location.search);
+  }, [location.pathname, location.search]);
+
+  return null;
+}
 
 function PageLoader() {
   return (
@@ -61,9 +72,12 @@ function LazyPage({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={<PageLoader />}>{children}</Suspense>;
 }
 
+initAnalytics();
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
+      <AnalyticsTracker />
       <Routes>
         <Route path="/" element={<App />} />
 

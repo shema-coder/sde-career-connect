@@ -200,10 +200,7 @@ export default function ArticlePage() {
             </div>
 
             {(() => {
-              const DEFAULT_YOUTUBE_APPLICATION_URL =
-    "https://www.youtube.com/@STOREROOMDIGITALEMPIRE";
-
-  const urls = extractUrls(post.content);
+              const urls = extractUrls(post.content);
 
               const applicationLink =
                 post.applicationLink ||
@@ -214,11 +211,10 @@ export default function ArticlePage() {
                 );
 
               const youtubeLink =
-    post.youtubeLink ||
-    urls.find((url) =>
-      /youtube\\.com|youtu\\.be/i.test(url),
-    ) ||
-    DEFAULT_YOUTUBE_APPLICATION_URL;
+                post.youtubeLink ||
+                urls.find((url) =>
+                  /youtube\.com|youtu\.be/i.test(url),
+                );
 
               const whatsappLink =
                 post.whatsappLink ||
@@ -233,12 +229,7 @@ export default function ArticlePage() {
                       TAKE THE NEXT STEP
                     </span>
 
-                    <h2>Choose what you need and continue</h2>
-
-                    <p>
-                      Apply, learn how to apply, connect with us, or register
-                      for SDE Career Connect support.
-                    </p>
+                    <h2>Everything you need to move forward</h2>
                   </div>
 
                   <div className="article-action-buttons">
@@ -258,15 +249,20 @@ export default function ArticlePage() {
                     )}
 
                     {youtubeLink && (
-                      <a className="article-action-button article-action-secondary" href={youtubeLink} target="_blank" rel="noopener noreferrer">
-            <span className="article-action-icon">
-              <img
-                src="/assets/youtube-logo.webp"
-                alt=""
-                className="article-action-logo"
-              />
-            </span>
-            <span className="article-action-copy">
+                      <a
+                        className="article-action-button article-action-secondary"
+                        href={youtubeLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <span className="article-action-icon">
+                          <img
+                            src="/assets/youtube-logo.webp"
+                            alt=""
+                            className="article-action-logo"
+                          />
+                        </span>
+                        <span className="article-action-copy">
                           <strong>YOUTUBE GUIDE</strong>
                           <small>Application steps</small>
                         </span>
@@ -274,16 +270,21 @@ export default function ArticlePage() {
                     )}
 
                     {whatsappLink && (
-                      <a className="article-action-button article-action-whatsapp" href={whatsappLink} target="_blank" rel="noopener noreferrer">
-            <span className="article-action-icon">
-              <img
-                src="/assets/whatsapp-logo.webp"
-                alt=""
-                className="article-action-logo"
-              />
-            </span>
-            <span className="article-action-copy">
-                          <strong>JOIN WHATSAPP</strong>
+                      <a
+                        className="article-action-button article-action-whatsapp"
+                        href={whatsappLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <span className="article-action-icon">
+                          <img
+                            src="/assets/whatsapp-logo.webp"
+                            alt=""
+                            className="article-action-logo"
+                          />
+                        </span>
+                        <span className="article-action-copy">
+                          <strong>WHATSAPP GROUP</strong>
                           <small>Get student support</small>
                         </span>
                       </a>
