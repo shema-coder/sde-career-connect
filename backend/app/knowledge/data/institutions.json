@@ -1,0 +1,531 @@
+{
+  "version": "1.1.0",
+  "description": "SDE Career Connect institutional knowledge registry. Institutional facts must be verified before being presented as current.",
+  "last_registry_update": "2026-09-21",
+  "institutions": [
+    {
+      "code": "UR",
+      "name": "University of Rwanda",
+      "aliases": [
+        "UR",
+        "University of Rwanda",
+        "University of Rwanda Admissions"
+      ],
+      "institution_type": "university",
+      "country": "Rwanda",
+      "official_website": "https://ur.ac.rw/",
+      "admissions_url": "https://ur.ac.rw/spip.php?page=admissions",
+      "application_url": "https://applications.ur.ac.rw/nesa/",
+      "description": "",
+      "verification_status": "verified_current",
+      "last_verified": "2026-09-21",
+      "programmes": [],
+      "admission_requirements": [],
+      "scholarships": [],
+      "deadlines": [],
+      "tvet_mappings": [],
+      "sources": [
+        {
+          "title": "University of Rwanda - Admissions",
+          "url": "https://ur.ac.rw/spip.php?page=admissions",
+          "source_type": "official_institution",
+          "verification_status": "verified_current",
+          "last_verified": "2026-09-21",
+          "notes": "Official University of Rwanda admissions page."
+        }
+      ],
+      "notes": [
+        "Phase 1 official-source registry verification completed on 2026-09-21."
+      ]
+    },
+    {
+      "code": "RP",
+      "name": "Rwanda Polytechnic",
+      "aliases": [
+        "RP",
+        "Rwanda Polytechnic",
+        "Rwanda Polytechnic College"
+      ],
+      "institution_type": "polytechnic",
+      "country": "Rwanda",
+      "official_website": "https://www.rp.ac.rw/",
+      "admissions_url": "https://web.rp.ac.rw/admissions",
+      "application_url": "",
+      "description": "",
+      "verification_status": "verified_current",
+      "last_verified": "2026-09-21",
+      "programmes": [],
+      "admission_requirements": [],
+      "scholarships": [],
+      "deadlines": [],
+      "tvet_mappings": [],
+      "sources": [
+        {
+          "title": "Rwanda Polytechnic Admissions",
+          "url": "https://web.rp.ac.rw/admissions",
+          "source_type": "official_institution",
+          "verification_status": "verified_current",
+          "last_verified": "2026-09-21",
+          "notes": "Official RP admissions page. Application portal link is intentionally left blank until directly verified."
+        }
+      ],
+      "notes": [
+        "Phase 1 official-source registry verification completed on 2026-09-21."
+      ]
+    },
+    {
+      "code": "ALU",
+      "name": "African Leadership University",
+      "aliases": [
+        "ALU",
+        "African Leadership University",
+        "African Leadership University Rwanda"
+      ],
+      "institution_type": "university",
+      "country": "Rwanda",
+      "official_website": "https://www.alueducation.com/",
+      "admissions_url": "https://www.alueducation.com/apply-now/",
+      "application_url": "https://www.alueducation.com/apply-now/",
+      "description": "",
+      "verification_status": "verified_current",
+      "last_verified": "2026-09-21",
+      "programmes": [],
+      "admission_requirements": [],
+      "scholarships": [],
+      "deadlines": [],
+      "tvet_mappings": [],
+      "sources": [
+        {
+          "title": "African Leadership University - Apply Now",
+          "url": "https://www.alueducation.com/apply-now/",
+          "source_type": "official_institution",
+          "verification_status": "verified_current",
+          "last_verified": "2026-09-21",
+          "notes": "Official ALU application page."
+        }
+      ],
+      "notes": [
+        "Phase 1 official-source registry verification completed on 2026-09-21."
+      ]
+    },
+    {
+      "code": "UOK",
+      "name": "University of Kigali",
+      "aliases": [
+        "UoK",
+        "UOK",
+        "University of Kigali"
+      ],
+      "institution_type": "university",
+      "country": "Rwanda",
+      "official_website": "https://uok.ac.rw/",
+      "admissions_url": "https://uok.ac.rw/admission-requirements/",
+      "application_url": "https://admissions.uok.ac.rw/",
+      "description": "",
+      "verification_status": "verified_current",
+      "last_verified": "2026-09-21",
+      "programmes": [],
+      "admission_requirements": [],
+      "scholarships": [],
+      "deadlines": [],
+      "tvet_mappings": [],
+      "sources": [
+        {
+          "title": "University of Kigali - Admission Requirements",
+          "url": "https://uok.ac.rw/admission-requirements/",
+          "source_type": "official_institution",
+          "verification_status": "verified_current",
+          "last_verified": "2026-09-21",
+          "notes": "Official UoK admission requirements page. UoK also publishes its admissions portal at admissions.uok.ac.rw."
+        }
+      ],
+      "notes": [
+        "Phase 1 official-source registry verification completed on 2026-09-21."
+      ]
+    },
+    {
+      "code": "AUCA",
+      "name": "Adventist University of Central Africa",
+      "aliases": [
+        "AUCA",
+        "Adventist University of Central Africa",
+        "Adventist University of Central Africa Rwanda"
+      ],
+      "institution_type": "university",
+      "country": "Rwanda",
+      "official_website": "https://web.auca.ac.rw/",
+      "admissions_url": "https://web.auca.ac.rw/admissions/undergraduate-requirements",
+      "application_url": "",
+      "description": "",
+      "verification_status": "verified_current",
+      "last_verified": "2026-09-21",
+      "programmes": [],
+      "admission_requirements": [],
+      "scholarships": [],
+      "deadlines": [],
+      "tvet_mappings": [],
+      "sources": [
+        {
+          "title": "AUCA Undergraduate Admission Requirements",
+          "url": "https://web.auca.ac.rw/admissions/undergraduate-requirements",
+          "source_type": "official_institution",
+          "verification_status": "verified_current",
+          "last_verified": "2026-09-21",
+          "notes": "Official AUCA undergraduate admissions page. Exact application URL intentionally left blank until directly verified."
+        }
+      ],
+      "notes": [
+        "Phase 1 official-source registry verification completed on 2026-09-21."
+      ]
+    },
+    {
+      "code": "ULK",
+      "name": "University of Lay Adventists of Kigali",
+      "aliases": [
+        "ULK",
+        "UNILAK",
+        "University of Lay Adventists of Kigali"
+      ],
+      "institution_type": "university",
+      "country": "Rwanda",
+      "official_website": "https://site.unilak.ac.rw/",
+      "admissions_url": "https://site.unilak.ac.rw/",
+      "application_url": "",
+      "description": "",
+      "verification_status": "verified_current",
+      "last_verified": "2026-09-21",
+      "programmes": [],
+      "admission_requirements": [],
+      "scholarships": [],
+      "deadlines": [],
+      "tvet_mappings": [],
+      "sources": [
+        {
+          "title": "University of Lay Adventists of Kigali",
+          "url": "https://site.unilak.ac.rw/",
+          "source_type": "official_institution",
+          "verification_status": "verified_current",
+          "last_verified": "2026-09-21",
+          "notes": "Current official UNILAK website. The registry keeps ULK as the SDE institution code for compatibility."
+        }
+      ],
+      "notes": [
+        "Phase 1 official-source registry verification completed on 2026-09-21."
+      ]
+    },
+    {
+      "code": "UTAB",
+      "name": "University of Technology and Arts of Byumba",
+      "aliases": [
+        "UTAB",
+        "University of Technology and Arts of Byumba"
+      ],
+      "institution_type": "university",
+      "country": "Rwanda",
+      "official_website": "https://utab.ac.rw/",
+      "admissions_url": "https://utab.ac.rw/how-to-apply/",
+      "application_url": "",
+      "description": "",
+      "verification_status": "verified_current",
+      "last_verified": "2026-09-21",
+      "programmes": [],
+      "admission_requirements": [],
+      "scholarships": [],
+      "deadlines": [],
+      "tvet_mappings": [],
+      "sources": [
+        {
+          "title": "UTAB - How to Apply",
+          "url": "https://utab.ac.rw/how-to-apply/",
+          "source_type": "official_institution",
+          "verification_status": "verified_current",
+          "last_verified": "2026-09-21",
+          "notes": "Official UTAB application information. Exact UMIS destination is not hardcoded until directly verified."
+        }
+      ],
+      "notes": [
+        "Phase 1 official-source registry verification completed on 2026-09-21."
+      ]
+    },
+    {
+      "code": "ICK",
+      "name": "Institut Catholique de Kabgayi",
+      "aliases": [
+        "ICK",
+        "Institut Catholique de Kabgayi",
+        "Catholic Institute of Kabgayi"
+      ],
+      "institution_type": "university",
+      "country": "Rwanda",
+      "official_website": "https://www.uck.ac.rw/",
+      "admissions_url": "https://www.uck.ac.rw/uck/admission.php",
+      "application_url": "https://portal.uck.ac.rw/admission/",
+      "description": "",
+      "verification_status": "verified_current",
+      "last_verified": "2026-09-21",
+      "programmes": [],
+      "admission_requirements": [],
+      "scholarships": [],
+      "deadlines": [],
+      "tvet_mappings": [],
+      "sources": [
+        {
+          "title": "ICK Admission Portal",
+          "url": "https://portal.uck.ac.rw/admission/",
+          "source_type": "official_institution",
+          "verification_status": "verified_current",
+          "last_verified": "2026-09-21",
+          "notes": "Official ICK admissions portal."
+        }
+      ],
+      "notes": [
+        "Phase 1 official-source registry verification completed on 2026-09-21."
+      ]
+    },
+    {
+      "code": "INES",
+      "name": "INES Ruhengeri",
+      "aliases": [
+        "INES",
+        "INES-Ruhengeri",
+        "INES Ruhengeri",
+        "Institute of Applied Sciences"
+      ],
+      "institution_type": "university",
+      "country": "Rwanda",
+      "official_website": "https://www.ines.ac.rw/",
+      "admissions_url": "https://www.ines.ac.rw/admission/application-information/",
+      "application_url": "https://digitalcampus.ines.ac.rw/admission/",
+      "description": "",
+      "verification_status": "verified_current",
+      "last_verified": "2026-09-21",
+      "programmes": [],
+      "admission_requirements": [],
+      "scholarships": [],
+      "deadlines": [],
+      "tvet_mappings": [],
+      "sources": [
+        {
+          "title": "INES-Ruhengeri Application Information",
+          "url": "https://www.ines.ac.rw/admission/application-information/",
+          "source_type": "official_institution",
+          "verification_status": "verified_current",
+          "last_verified": "2026-09-21",
+          "notes": "Official INES-Ruhengeri admissions information and digital campus portal."
+        }
+      ],
+      "notes": [
+        "Phase 1 official-source registry verification completed on 2026-09-21."
+      ]
+    },
+    {
+      "code": "MKU",
+      "name": "Mount Kigali University",
+      "aliases": [
+        "MKU",
+        "MKUR",
+        "Mount Kigali University",
+        "Mount Kenya University Rwanda"
+      ],
+      "institution_type": "university",
+      "country": "Rwanda",
+      "official_website": "https://mkur.ac.rw/",
+      "admissions_url": "https://mkur.ac.rw/application-procedure/",
+      "application_url": "https://admission.mkur.ac.rw/",
+      "description": "",
+      "verification_status": "verified_current",
+      "last_verified": "2026-09-21",
+      "programmes": [],
+      "admission_requirements": [],
+      "scholarships": [],
+      "deadlines": [],
+      "tvet_mappings": [],
+      "sources": [
+        {
+          "title": "Mount Kigali University - Application Procedure",
+          "url": "https://mkur.ac.rw/application-procedure/",
+          "source_type": "official_institution",
+          "verification_status": "verified_current",
+          "last_verified": "2026-09-21",
+          "notes": "Official MKUR application procedure and admissions portal."
+        }
+      ],
+      "notes": [
+        "Phase 1 official-source registry verification completed on 2026-09-21."
+      ]
+    },
+    {
+      "code": "UTB",
+      "name": "University of Tourism, Technology and Business Studies",
+      "aliases": [
+        "UTB",
+        "University of Tourism Technology and Business Studies",
+        "University of Tourism, Technology and Business Studies"
+      ],
+      "institution_type": "university",
+      "country": "Rwanda",
+      "official_website": "https://utb.ac.rw/",
+      "admissions_url": "https://utb.ac.rw/admission/",
+      "application_url": "",
+      "description": "",
+      "verification_status": "verified_current",
+      "last_verified": "2026-09-21",
+      "programmes": [],
+      "admission_requirements": [],
+      "scholarships": [],
+      "deadlines": [],
+      "tvet_mappings": [],
+      "sources": [
+        {
+          "title": "UTB Admissions",
+          "url": "https://utb.ac.rw/admission/",
+          "source_type": "official_institution",
+          "verification_status": "verified_current",
+          "last_verified": "2026-09-21",
+          "notes": "Official UTB admissions page. Exact online application endpoint intentionally left blank until directly verified."
+        }
+      ],
+      "notes": [
+        "Phase 1 official-source registry verification completed on 2026-09-21."
+      ]
+    },
+    {
+      "code": "CUR",
+      "name": "Catholic University of Rwanda",
+      "aliases": [
+        "CUR",
+        "Catholic University of Rwanda"
+      ],
+      "institution_type": "university",
+      "country": "Rwanda",
+      "official_website": "https://www.cur.ac.rw/",
+      "admissions_url": "https://www.cur.ac.rw/admissionRequirements",
+      "application_url": "https://www.cur.ac.rw/application_guide",
+      "description": "",
+      "verification_status": "verified_current",
+      "last_verified": "2026-09-21",
+      "programmes": [],
+      "admission_requirements": [],
+      "scholarships": [],
+      "deadlines": [],
+      "tvet_mappings": [],
+      "sources": [
+        {
+          "title": "Catholic University of Rwanda - Admission Requirements",
+          "url": "https://www.cur.ac.rw/admissionRequirements",
+          "source_type": "official_institution",
+          "verification_status": "verified_current",
+          "last_verified": "2026-09-21",
+          "notes": "Official CUR admission requirements page."
+        }
+      ],
+      "notes": [
+        "Phase 1 official-source registry verification completed on 2026-09-21."
+      ]
+    },
+    {
+      "code": "KEPLER",
+      "name": "Kepler College",
+      "aliases": [
+        "Kepler",
+        "Kepler College"
+      ],
+      "institution_type": "college",
+      "country": "Rwanda",
+      "official_website": "https://keplercollege.ac.rw/",
+      "admissions_url": "https://keplercollege.ac.rw/admission-aid/",
+      "application_url": "",
+      "description": "",
+      "verification_status": "verified_current",
+      "last_verified": "2026-09-21",
+      "programmes": [],
+      "admission_requirements": [],
+      "scholarships": [],
+      "deadlines": [],
+      "tvet_mappings": [],
+      "sources": [
+        {
+          "title": "Kepler College - Admission & Aid",
+          "url": "https://keplercollege.ac.rw/admission-aid/",
+          "source_type": "official_institution",
+          "verification_status": "verified_current",
+          "last_verified": "2026-09-21",
+          "notes": "Official Kepler College admissions and financial-aid page."
+        }
+      ],
+      "notes": [
+        "Phase 1 official-source registry verification completed on 2026-09-21."
+      ]
+    },
+    {
+      "code": "RICA",
+      "name": "Rwanda Institute for Conservation Agriculture",
+      "aliases": [
+        "RICA",
+        "Rwanda Institute for Conservation Agriculture"
+      ],
+      "institution_type": "institute",
+      "country": "Rwanda",
+      "official_website": "https://www.rica.rw/",
+      "admissions_url": "https://www.rica.rw/admissions/",
+      "application_url": "https://www.rica.rw/admissions/application-process/",
+      "description": "",
+      "verification_status": "verified_current",
+      "last_verified": "2026-09-21",
+      "programmes": [],
+      "admission_requirements": [],
+      "scholarships": [],
+      "deadlines": [],
+      "tvet_mappings": [],
+      "sources": [
+        {
+          "title": "RICA - Application Process",
+          "url": "https://www.rica.rw/admissions/application-process/",
+          "source_type": "official_institution",
+          "verification_status": "verified_current",
+          "last_verified": "2026-09-21",
+          "notes": "Official RICA admissions page. Current application window is explicitly reported as closed on the official page."
+        }
+      ],
+      "notes": [
+        "Phase 1 official-source registry verification completed on 2026-09-21."
+      ]
+    },
+    {
+      "code": "PIASS",
+      "name": "Protestant Institute of Arts and Social Sciences",
+      "aliases": [
+        "PIASS",
+        "Protestant Institute of Arts and Social Sciences",
+        "Protestant University of Rwanda",
+        "PUR"
+      ],
+      "institution_type": "university",
+      "country": "Rwanda",
+      "official_website": "https://pur.ac.rw/",
+      "admissions_url": "https://www.pur.ac.rw/admissions_page.php",
+      "application_url": "https://pur.ac.rw/pages/admissions.php",
+      "description": "",
+      "verification_status": "verified_current",
+      "last_verified": "2026-09-21",
+      "programmes": [],
+      "admission_requirements": [],
+      "scholarships": [],
+      "deadlines": [],
+      "tvet_mappings": [],
+      "sources": [
+        {
+          "title": "Protestant University of Rwanda - Admissions",
+          "url": "https://www.pur.ac.rw/admissions_page.php",
+          "source_type": "official_institution",
+          "verification_status": "verified_current",
+          "last_verified": "2026-09-21",
+          "notes": "Current official PUR site contains the PIASS admissions information. PIASS became Protestant University of Rwanda (PUR). SDE keeps PIASS as the institution code for continuity."
+        }
+      ],
+      "notes": [
+        "Phase 1 official-source registry verification completed on 2026-09-21."
+      ]
+    }
+  ]
+}

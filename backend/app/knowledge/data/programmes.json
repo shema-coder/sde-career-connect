@@ -1,0 +1,109 @@
+{
+  "version": "1.1.0",
+  "description": "Structured undergraduate and higher-education programme catalogue for SDE Career Connect. Programme records must be supported by source metadata and verification status.",
+  "last_registry_update": "2026-09-21",
+  "record_count": 0,
+  "institutions_with_programmes": [],
+  "institutions_pending": [
+    "UR",
+    "RP",
+    "ALU",
+    "UOK",
+    "AUCA",
+    "ULK",
+    "UTAB",
+    "ICK",
+    "INES",
+    "MKU",
+    "UTB",
+    "CUR",
+    "KEPLER",
+    "RICA",
+    "PIASS"
+  ],
+  "programmes": [],
+  "admission_cycles": [
+    {
+      "institution_code": "UR",
+      "academic_year": "2026-2027",
+      "level": "undergraduate",
+      "status": "closed",
+      "opened": "2026-07-27",
+      "deadline": "2026-08-30",
+      "programme_count": 109,
+      "programme_choices_in_call": 5,
+      "programme_choices_in_current_application_guide": 3,
+      "verification_status": "verified_current",
+      "sources": [
+        {
+          "title": "UR Undergraduate Application 2026-2027",
+          "url": "https://studentrak.ur.ac.rw/calls/746b33fc-36b3-48b0-b252-cb327171e1d3",
+          "source_type": "official_institution",
+          "last_verified": "2026-09-21"
+        },
+        {
+          "title": "UR Academic Programs Portal",
+          "url": "https://programs.ur.ac.rw/academic-programs",
+          "source_type": "official_institution",
+          "last_verified": "2026-09-21"
+        }
+      ],
+      "notes": [
+        "The official 2026-2027 StudentTrak call lists 109 programmes.",
+        "The StudentTrak call states that the application window closed on 30 August 2026.",
+        "The StudentTrak call says applicants may select up to 5 programme choices.",
+        "The current UR Academic Programs application guide says applicants may select up to 3 choices.",
+        "The discrepancy must be preserved until the applicable application workflow is confirmed."
+      ]
+    }
+  ],
+  "import_queue": {
+    "institution_code": "UR",
+    "academic_year": "2026-2027",
+    "level": "undergraduate",
+    "expected_records": 109,
+    "source": {
+      "title": "UR Undergraduate Application 2026-2027",
+      "url": "https://studentrak.ur.ac.rw/calls/746b33fc-36b3-48b0-b252-cb327171e1d3",
+      "source_type": "official_institution",
+      "verification_status": "verified_current",
+      "last_verified": "2026-09-21"
+    },
+    "status": "ready_for_verified_import",
+    "imported_records": 0,
+    "notes": [
+      "Do not invent programme records.",
+      "Every imported programme must have an official programme code.",
+      "Every imported programme must have a programme name.",
+      "Duration must come from the official source when available.",
+      "Programme records must be undergraduate programmes linked to the 2026-2027 call.",
+      "Programme eligibility combinations will be stored separately."
+    ]
+  },
+  "validation_rules": {
+    "required_programme_fields": [
+      "programme_id",
+      "institution_code",
+      "name",
+      "programme_code",
+      "award",
+      "level",
+      "duration_years",
+      "verification_status",
+      "last_verified",
+      "source"
+    ],
+    "required_source_fields": [
+      "title",
+      "url",
+      "source_type",
+      "last_verified"
+    ],
+    "allowed_verification_statuses": [
+      "verified_current",
+      "historical_reference",
+      "needs_verification",
+      "no_verified_information"
+    ]
+  }
+}

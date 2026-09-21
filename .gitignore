@@ -11,3 +11,7 @@ backend/storage/backups/
 backend/.venv/
 backend/**/__pycache__/
 *.pyc
+
+# Local checkpoints and temporary snapshots
+sde-career-connect-checkpoints/
+~/sde-career-connect-checkpoints/

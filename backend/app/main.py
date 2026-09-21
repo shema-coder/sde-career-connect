@@ -13,6 +13,7 @@ from .database import (
     get_db,
     ensure_student_application_schema,
 )
+from .ai_service import generate_chat_response
 from .models import NewsPost, StudentApplication, Member
 from .schemas import (
     ApplicationCreate,
@@ -28,16 +29,28 @@ from .schemas import (
     MemberCountResponse,
     MemberStatsResponse,
 )
+from .knowledge.routes import router as knowledge_router
 
 
 Base.metadata.create_all(bind=engine)
 ensure_student_application_schema()
 
+
+from pydantic import BaseModel
+
+class AIChatRequest(BaseModel):
+    message: str
+
+class AIChatResponse(BaseModel):
+    response: str
+
 app = FastAPI(
+
     title="SDE Career Connect API",
     version="1.0.0",
     description="Backend for SDE Career Connect student application support.",
 )
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -861,3 +874,32 @@ def delete_member(
         "message": "Member deleted successfully.",
         "id": member_id,
     }
+
+
+@app.post("/ai/chat", response_model=AIChatResponse)
+def ai_chat(payload: AIChatRequest):
+    message = payload.message.strip()
+
+    if not message:
+        raise HTTPException(
+            status_code=400,
+            detail="Message cannot be empty.",
+        )
+
+    if len(message) > 4000:
+        raise HTTPException(
+            status_code=400,
+            detail="Message is too long. Please keep it under 4000 characters.",
+        )
+
+    try:
+        response = generate_chat_response(message)
+        return AIChatResponse(response=response)
+    except Exception as error:
+        raise HTTPException(
+            status_code=502,
+            detail="SDE AI is temporarily unavailable.",
+        ) from error
+
+# SDE Knowledge Layer routes
+app.include_router(knowledge_router)

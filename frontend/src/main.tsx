@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 
 import "./index.css";
+import SDEAIChatbot from "./components/SDEAIChatbot";
 import App from "./App.tsx";
 import { initAnalytics, trackPageView } from "./lib/analytics.ts";
 
@@ -173,6 +174,7 @@ createRoot(document.getElementById("root")!).render(
           }
         />
       </Routes>
+          <SDEAIChatbot />
     </BrowserRouter>
   </StrictMode>,
 );

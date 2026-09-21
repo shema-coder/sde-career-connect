@@ -1,0 +1,7 @@
+.env
+
+# Local backups and temporary snapshots
+*.backup
+*.before_*
+backups/
+sde-career-connect-checkpoints/
